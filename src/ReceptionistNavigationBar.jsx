@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaRegUser, FaCalendarAlt, FaFileAlt, FaClipboardList } from 'react-icons/fa'; // Example icons
 
 function NavigationBar({ onSelectSection }) {
   return (
@@ -6,22 +7,22 @@ function NavigationBar({ onSelectSection }) {
       <button 
         onClick={() => onSelectSection('register')} 
         className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300">
-        Register Patient
+        <FaRegUser className="inline mr-2" /> Register Patient
       </button>
       <button 
         onClick={() => onSelectSection('schedule')} 
         className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300">
-        Schedule Appointment
+        <FaCalendarAlt className="inline mr-2" /> Schedule Appointment
       </button>
       <button 
         onClick={() => onSelectSection('records')} 
         className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300">
-        Patient Records
+        <FaFileAlt className="inline mr-2" /> Patient Records
       </button>
       <button 
         onClick={() => onSelectSection('appointments')} 
         className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300">
-        Upcoming Appointments
+        <FaClipboardList className="inline mr-2" /> Upcoming Appointments
       </button>
     </nav>
   );
