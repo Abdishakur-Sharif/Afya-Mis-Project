@@ -95,7 +95,7 @@ function UpcomingAppointments() {
                   setDoctorName(appointment.doctorName);
                   setAppointmentDate(appointment.appointmentDate);
                 }}
-                className="bg-yellow-500 text-white p-2 mt-2 mr-2"
+                className="bg-blue-500 text-white p-2 mt-2 mr-2"
               >
                 Update
               </button>
