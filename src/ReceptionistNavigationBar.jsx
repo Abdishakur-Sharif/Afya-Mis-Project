@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaRegUser, FaCalendarAlt, FaFileAlt, FaClipboardList } from 'react-icons/fa'; // Example icons
+import { FaRegUser, FaCalendarAlt, FaFileAlt, FaClipboardList } from 'react-icons/fa'; 
 
 function NavigationBar({ onSelectSection }) {
   return (
