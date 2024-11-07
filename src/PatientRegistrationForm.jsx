@@ -9,9 +9,27 @@ function PatientRegistrationForm({ onSubmit }) {
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Check if all fields are filled
+    if (!patientName || !contactInfo || !email || !address || !dateOfBirth || !gender) {
+      setErrorMessage('Please fill in all fields to register patient.');
+
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000); // 3000ms = 3 seconds
+
+      return;
+    }
+
+    // Clear any existing error message if validation passes
+    setErrorMessage('');
+
+    // Proceed with the form submission
     onSubmit({ patientName, contactInfo, email, address, dateOfBirth, age, gender });
     setPatientName('');
     setContactInfo('');
@@ -124,6 +142,13 @@ function PatientRegistrationForm({ onSubmit }) {
       {isRegistered && (
         <div className="mt-4 p-4 text-green-700 bg-green-100 rounded-lg text-center">
           Patient has been successfully registered!
+        </div>
+      )}
+
+      {/* Display the error message if validation fails */}
+      {errorMessage && (
+        <div className="mt-4 p-4 text-red-700 bg-red-100 rounded-lg text-center">
+          {errorMessage}
         </div>
       )}
     </div>
