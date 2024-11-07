@@ -1,13 +1,13 @@
-import React from 'react'
-import './App.css'
+// src/App.js
+import React from 'react';
+import ReceptionistDashboard from './ReceptionistDashboard';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    </>
-  )
+    <div className="App">
+      <ReceptionistDashboard />
+    </div>
+  );
 }
 
-export default App
+export default App;
