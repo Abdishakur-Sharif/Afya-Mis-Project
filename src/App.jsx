@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import ReceptionistDashboard from './Components/ReceptionistDashboard';
+import ReceptionistDashboard from './Componets/ReceptionistDashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ForgotPassword from './Componets/ForgotPassword';
 import Login from './Componets/LogIn';

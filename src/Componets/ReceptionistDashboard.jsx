@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavigationBar from './ReceptionistNavigationBar';
 import PatientRegistrationForm from './PatientRegistrationForm';
 import AppointmentScheduler from './AppointmentScheduler';
@@ -8,12 +9,14 @@ import Appointments from './Appointments';
 function ReceptionistDashboard() {
   const [selectedSection, setSelectedSection] = useState('register');
   const [patients, setPatients] = useState([]);
+  const navigate = useNavigate()
 
   const handleRegisterPatient = (patient) => {
     setPatients([...patients, patient]);
   };
 
   return (
+    
     <div className="min-h-screen bg-gray-50 flex">
       <NavigationBar onSelectSection={setSelectedSection} />
 
