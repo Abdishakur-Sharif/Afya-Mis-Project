@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import ReceptionistDashboard from './ReceptionistDashboard';
+import ReceptionistDashboard from './Components/ReceptionistDashboard';
 
 function App() {
   return (

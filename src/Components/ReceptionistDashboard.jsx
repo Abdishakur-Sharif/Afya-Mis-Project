@@ -3,7 +3,7 @@ import NavigationBar from './ReceptionistNavigationBar';
 import PatientRegistrationForm from './PatientRegistrationForm';
 import AppointmentScheduler from './AppointmentScheduler';
 import PatientRecords from './PatientRecords';
-import UpcomingAppointments from './UpcomingAppointments';
+import Appointments from './Appointments';
 
 function ReceptionistDashboard() {
   const [selectedSection, setSelectedSection] = useState('register');
@@ -21,7 +21,7 @@ function ReceptionistDashboard() {
         {selectedSection === 'register' && <PatientRegistrationForm onSubmit={handleRegisterPatient} />}
         {selectedSection === 'schedule' && <AppointmentScheduler />}
         {selectedSection === 'records' && <PatientRecords patients={patients} />}
-        {selectedSection === 'appointments' && <UpcomingAppointments />}
+        {selectedSection === 'appointments' && <Appointments />}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ function NavigationBar({ onSelectSection }) {
       <button 
         onClick={() => onSelectSection('appointments')} 
         className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300">
-        <FaClipboardList className="inline mr-2" /> Upcoming Appointments
+        <FaClipboardList className="inline mr-2" /> Appointments
       </button>
     </nav>
   );
