@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import Report from './report';
+import Report from './Components/report';
 
 
 function App() {
