@@ -7,13 +7,15 @@ import Login from './Componets/LogIn';
 import Registration from './Componets/Registration';
 import Doctordashboard from './Componets/Doctordashboard';
 import LabReportForm from './Componets/LabReportForm';
+import Report from './Components/Report';
+
 
 function App() {
-  
+  // ;
 
   return (
-    <>
-      
+    <div>
+        
         <Routes>
           <Route path='/doctordashboard' element={<Doctordashboard />} />
           <Route path='/labreportform' element={<LabReportForm />} />
@@ -21,9 +23,13 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
+          <Route path="/report" element={<Report />} />
         </Routes>
-    </>
-  );
+    
+      
+    </div>
+  );;
+
 }
 
 export default App;
