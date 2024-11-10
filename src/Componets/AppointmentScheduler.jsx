@@ -1,4 +1,3 @@
-// AppointmentScheduler.js
 import React, { useState } from 'react';
 
 function AppointmentScheduler() {
@@ -31,7 +30,7 @@ function AppointmentScheduler() {
   };
 
   return (
-    <div className="p-8 bg-white shadow-lg rounded-lg">
+    <div className="p-8 bg-white shadow-lg rounded-lg max-w-lg mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Schedule Appointment</h2>
       <form onSubmit={handleSubmit}>
         <input

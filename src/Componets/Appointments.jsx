@@ -60,7 +60,7 @@ function Appointments() {
         type="datetime-local"
         value={appointmentDate}
         onChange={(e) => setAppointmentDate(e.target.value)}
-        className="border p-3 w-full mb-4 rounded-md shadow-sm"
+        className="border p-3 w-full sm:w-96 mb-4 rounded-md shadow-sm"
       />
       <button
         onClick={() => handleUpdate(editAppointment)}
@@ -72,11 +72,11 @@ function Appointments() {
   );
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4 text-blue-700">Manage Appointments</h2>
+    <div className="p-6 md:p-8 lg:p-10 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl md:text-3xl font-bold mb-4 text-blue-700">Manage Appointments</h2>
 
       {showSuccessMessage && (
-        <div className="bg-green-100 text-green-800 p-3 rounded-lg mb-4">
+        <div className="bg-green-100 text-green-800 p-3 rounded-lg mb-4 w-full sm:w-1/2 lg:w-1/3 mx-auto">
           {showSuccessMessage}
         </div>
       )}
@@ -86,7 +86,7 @@ function Appointments() {
       {appointments.length === 0 ? (
         <p className="text-lg text-gray-500">No upcoming appointments.</p>
       ) : (
-        <ul className="space-y-6">
+        <ul className="space-y-6 md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {appointments.map((appointment, index) => (
             <li key={index} className="p-4 bg-gray-50 border rounded-lg shadow-md transition-transform transform hover:scale-105">
               <div className="flex items-center mb-2">
@@ -104,19 +104,19 @@ function Appointments() {
                 <FaClock className="mr-2 text-blue-500" />
                 <span>{formatTime(appointment.appointmentDate)}</span>
               </div>
-              <div className="mt-4 flex space-x-4">
+              <div className="mt-4 flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
                 <button
                   onClick={() => {
                     setEditAppointment(index);
                     setAppointmentDate(appointment.appointmentDate);
                   }}
-                  className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition-all flex items-center"
+                  className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition-all flex items-center w-full sm:w-auto"
                 >
                   <FaEdit className="mr-2" /> Reschedule
                 </button>
                 <button
                   onClick={() => handleCancel(index)}
-                  className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition-all flex items-center"
+                  className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 transition-all flex items-center w-full sm:w-auto"
                 >
                   <FaTrashAlt className="mr-2" /> Cancel
                 </button>

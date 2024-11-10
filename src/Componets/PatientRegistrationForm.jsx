@@ -69,8 +69,8 @@ function PatientRegistrationForm({ onSubmit }) {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="p-8 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto p-4">
+      <form onSubmit={handleSubmit} className="p-6 bg-white shadow-lg rounded-lg space-y-6">
         <h2 className="text-2xl font-bold mb-6 text-center">Register Patient</h2>
         
         <input
@@ -78,7 +78,7 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Patient Name"
           value={patientName}
           onChange={(e) => { setPatientName(e.target.value); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
         
         <input
@@ -86,7 +86,7 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Contact Info"
           value={contactInfo}
           onChange={(e) => { setContactInfo(e.target.value); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -94,7 +94,7 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Email"
           value={email}
           onChange={(e) => { setEmail(e.target.value); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -102,7 +102,7 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Address"
           value={address}
           onChange={(e) => { setAddress(e.target.value); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
         
         <input
@@ -110,7 +110,7 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Date of Birth"
           value={dateOfBirth}
           onChange={(e) => { handleDateOfBirthChange(e); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
         
         <input
@@ -118,13 +118,13 @@ function PatientRegistrationForm({ onSubmit }) {
           placeholder="Age"
           value={age}
           disabled
-          className="border p-4 mb-6 w-full rounded-lg bg-gray-200"
+          className="border p-4 w-full rounded-lg bg-gray-200"
         />
         
         <select
           value={gender}
           onChange={(e) => { setGender(e.target.value); resetConfirmation(); }}
-          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="border p-4 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select Gender</option>
           <option value="Male">Male</option>
