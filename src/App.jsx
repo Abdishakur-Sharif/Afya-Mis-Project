@@ -7,7 +7,7 @@ import Login from './Componets/LogIn';
 import Registration from './Componets/Registration';
 import Doctordashboard from './Componets/Doctordashboard';
 import LabReportForm from './Componets/LabReportForm';
-import Report from './Components/Report';
+import Report from './Componets/Report';
 
 
 function App() {
