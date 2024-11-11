@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import registration from "../assets/Images/registration.jpg";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { doCreateUserWithEmailAndPassword, doSignInWithGoogle } from "../firebase/auth"; 
+import { doCreateUserWithEmailAndPassword, doSignInWithGoogle, setUserRole } from "../firebase/auth"; 
 import { useAuth } from "../context/authcontext";
 
 function Registration() {
@@ -11,6 +11,7 @@ function Registration() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("doctor"); // Default role is 'doctor'
   const [isRegistering, setIsRegistering] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -29,19 +30,24 @@ function Registration() {
 
     try {
       // Firebase registration call
-      await doCreateUserWithEmailAndPassword(email, password);
-      
+      const userCredential = await doCreateUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      // Set the user's role in Firestore (e.g., "admin", "doctor", etc.)
+      await setUserRole(user, role); // Save the role selected by the user
+
       // Clear form fields after successful registration
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      navigate('/home'); // Navigate to home page after registration
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
 
-    setIsRegistering(false);
+      navigate('/'); // Navigate to home page after registration
+    } catch (error) {
+      setErrorMessage(error.message); // Display error message
+    } finally {
+      setIsRegistering(false); // Stop loading state
+    }
   };
 
   const onGoogleSignIn = async (e) => {
@@ -50,7 +56,7 @@ function Registration() {
       setIsSigningIn(true);
       try {
         await doSignInWithGoogle();
-        navigate('/home'); // Navigate to home page after Google sign-in
+        navigate('/'); // Navigate to home page after Google sign-in
       } catch (err) {
         setErrorMessage(err.message);
       }
@@ -61,9 +67,7 @@ function Registration() {
   return (
     <div>
       <div className="w-full mb-8">
-        <h1 className="text-5xl font-bold text-blue-500 relative ml-20">
-          Afya
-        </h1>
+        <h1 className="text-5xl font-bold text-blue-500 relative ml-20">Afya</h1>
         <div className="w-full h-0.5 bg-gray-400 mt-2"></div>
       </div>
       <div className="w-full min-h-screen flex justify-center items-center py-12">
@@ -73,7 +77,7 @@ function Registration() {
           </div>
           <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
             <h3 className="text-2xl font-semibold mb-4">Registration</h3>
-            <p className="text-sm mb-4">Welcome to PetPal! Please enter your details</p>
+            <p className="text-sm mb-4">Welcome to Afya! Please enter your details</p>
 
             <form onSubmit={onSubmit} className="flex flex-col">
               <input
@@ -104,12 +108,29 @@ function Registration() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="placeholder:text-black bg-transparent py-2 my-2 border-b border-black focus:outline-none"
               />
+              
+              {/* Role Selection Dropdown */}
+              <div className="my-4">
+                <label htmlFor="role" className="text-sm">Choose Role:</label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="bg-transparent border-b border-black py-2 focus:outline-none"
+                >
+                  <option value="doctor">Doctor</option>
+                  <option value="receptionist">Receptionist</option>
+                  <option value="lab-staff">Lab Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
               <button
                 type="submit"
                 disabled={isRegistering}
                 className="text-white bg-blue-500 py-2 my-4 w-full rounded hover:bg-purple-700"
               >
-                Register
+                {isRegistering ? 'Registering...' : 'Register'}
               </button>
               
               {/* Google Sign-In Button */}
