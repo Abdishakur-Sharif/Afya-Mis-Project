@@ -11,6 +11,8 @@ import Report from './Components/Report';
 import Appointments from './Components/Appointments';
 import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
+import Patient from './Componets/patients';
+import TestRequestsPage from './Componets/testrequest';
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
 
           {/* Default Route */}
           <Route path="/" element={<h1>Welcome to the Hospital Management System</h1>} />
+          <Route path="/patients" element={<Patient/>} />
+          <Route path="/testrequests" element={<TestRequestsPage/>} />
         </Routes>
       </>
     </AuthProvider>
