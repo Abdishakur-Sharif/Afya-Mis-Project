@@ -30,8 +30,6 @@ const initialPatients = [
   { id: 5, name: 'Margaret Smith', address: '4578 Village View Drive', disease: 'Neuro', status: 'Cancel' },
 ];
 
-
-
 function Doctordashboard() {
    const [patients, setPatients] = useState(initialPatients);
   const toggleStatus = (id) => {
@@ -75,77 +73,77 @@ function Doctordashboard() {
   ];
 
   return (
-    // add a welcome message for the doctor and the calender with time
-    <div>
-      <div className="flex flex-row">
-        <Sidebar />
-        <div className="flex flex-col">
-          <div className="p-6 h-10 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 text-left w-full mb-32">
-            {summaryCards.map((card, index) => (
-              <Paper key={index} className={`${card.bgColor} text-white p-6 rounded-lg shadow-lg relative`}>
-                <h3 className="text-xl">{card.label}</h3>
-                <p className="text-4xl font-semibold">{card.value}</p>
-                {card.icon}
-              </Paper>
-            ))}
-          </div>
-          <div className="flex space-x-4">
-            {/* New Patient List */}
-            <div className="w-full p-6 bg-gray-50 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">New Patient List</h2>
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-200 text-left">
-                    <th className="p-3 text-gray-600">Name</th>
-                    <th className="p-3 text-gray-600">Address</th>
-                    <th className="p-3 text-gray-600">Diseases</th>
-                    <th className="p-3 text-gray-600">Status</th>
+    <div className="flex flex-col lg:flex-row">
+      <Sidebar />
+      <div className="flex flex-col w-full p-4 lg:w-4/5">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {summaryCards.map((card, index) => (
+            <Paper key={index} className={`${card.bgColor} text-white p-6 rounded-lg shadow-lg relative`}>
+              <h3 className="text-xl">{card.label}</h3>
+              <p className="text-4xl font-semibold">{card.value}</p>
+              {card.icon}
+            </Paper>
+          ))}
+        </div>
+
+        {/* New Patient List */}
+        <div className="w-full p-6 bg-gray-50 rounded-lg shadow-lg mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">New Patient List</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-200 text-left">
+                  <th className="p-3 text-gray-600">Name</th>
+                  <th className="p-3 text-gray-600">Address</th>
+                  <th className="p-3 text-gray-600">Diseases</th>
+                  <th className="p-3 text-gray-600">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {patients.map((patient) => (
+                  <tr key={patient.id} className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="p-3">{patient.name}</td>
+                    <td className="p-3">{patient.address}</td>
+                    <td className="p-3">{patient.disease}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => toggleStatus(patient.id)}
+                        className={`px-3 py-1 rounded-full text-white font-medium transition-all
+                          ${patient.status === 'Received' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}
+                      >
+                        {patient.status}
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {patients.map((patient) => (
-                    <tr key={patient.id} className="border-b border-gray-300 hover:bg-gray-100">
-                      <td className="p-3">{patient.name}</td>
-                      <td className="p-3">{patient.address}</td>
-                      <td className="p-3">{patient.disease}</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => toggleStatus(patient.id)}
-                          className={`px-3 py-1 rounded-full text-white font-medium transition-all
-                            ${
-                              patient.status === 'Received'
-                                ? 'bg-green-500 hover:bg-green-600'
-                                : 'bg-red-500 hover:bg-red-600'
-                            }`}
-                        >
-                          {patient.status}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
-       <Appointments />
-      {/* Area Chart */}
-      <div className="p-6 w-full" style={{ height: '500px' }}>
-        <h2 className="text-2xl mb-4">Patient Data Over the Year</h2>
-        <ResponsiveContainer width="100%" height={400}>
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="newPatients" stroke="#8884d8" fill="#8884d8" />
-            <Area type="monotone" dataKey="oldPatients" stroke="#82ca9d" fill="#82ca9d" />
-          </AreaChart>
-        </ResponsiveContainer>
+
+        {/* Appointments Section */}
+        <Appointments />
+
+        {/* Area Chart */}
+        <div className="p-6 w-full" style={{ height: '500px' }}>
+          <h2 className="text-2xl mb-4">Patient Data Over the Year</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="newPatients" stroke="#8884d8" fill="#8884d8" />
+              <Area type="monotone" dataKey="oldPatients" stroke="#82ca9d" fill="#82ca9d" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
 }
 
 export default Doctordashboard;
+
+

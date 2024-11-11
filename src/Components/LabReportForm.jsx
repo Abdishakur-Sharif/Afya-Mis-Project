@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import { Paper } from '@mantine/core';
 import {
-  IconStethoscope,
-  IconFileText,
-  IconLogout,
   IconHospitalCircle
 } from '@tabler/icons-react';
 
@@ -78,50 +74,16 @@ const LabReportForm = () => {
 
   return (
     <div className='flex flex-col md:flex-row gap-6'>
-      <Paper shadow="sm" className="md:w-1/4 w-full h-auto md:h-[500px] p-4">
-        <h2 className="text-4xl ml-5 my-5 font-bold text-blue-500 mb-5 md:mr-10">Afya</h2>
-        <ul className="space-y-4">
-          <li>
-            <a
-              href="/settings"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+      <div className="w-full md:w-3/4 mx-auto bg-white shadow-md rounded-lg p-4 md:p-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-4 md:mb-6">Lab Report Form</h2>
+        <a
+              href="/lab-dashboard"
+              className="mb-5 flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
             >
               <IconHospitalCircle size={20} className="mr-3" />
               Lab Requests
             </a>
-          </li>
-          <li>
-            <a
-              href="/doctors"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
-            >
-              <IconStethoscope size={20} className="mr-3" />
-              Doctors
-            </a>
-          </li>
-          <li>
-            <a
-              href="/reports"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
-            >
-              <IconFileText size={20} className="mr-3" />
-              Lab Reports
-            </a>
-          </li>
-          <li>
-            <a
-              href="/login"
-              className="flex items-center p-2 text-gray-700 hover:bg-red-500 hover:text-white transition-colors rounded-md"
-            >
-              <IconLogout size={20} className="mr-3" />
-              Logout
-            </a>
-          </li>
-        </ul>
-      </Paper>
-      <div className="w-full md:w-3/4 mx-auto bg-white shadow-md rounded-lg p-4 md:p-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-4 md:mb-6">Lab Report Form</h2>
-
+      
         <Notification message={notification.message} type={notification.type} />
 
         <form onSubmit={handleSubmit} className="space-y-4">

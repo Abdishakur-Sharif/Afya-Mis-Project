@@ -21,6 +21,12 @@ import {
   Paper,
   Badge,
 } from '@mui/material';
+import {
+  IconStethoscope,
+  IconFileText,
+  IconLogout,
+  IconHospitalCircle
+} from '@tabler/icons-react';
 import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
 
 // Sample data for test requests
@@ -101,7 +107,50 @@ function TestRequestsPage() {
   );
 
   return (
+    <div className='flex flex-row'>
+      <Paper shadow="sm" className="md:w-1/4 w-full h-auto md:h-[500px] p-4">
+        <h2 className="text-4xl ml-5 my-5 font-bold text-blue-500 mb-5 md:mr-10">Afya</h2>
+        <ul className="space-y-4">
+          <li>
+            <a
+              href="/lab-dashboard"
+              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+            >
+              <IconHospitalCircle size={20} className="mr-3" />
+              Lab Requests
+            </a>
+          </li>
+          <li>
+            <a
+              href="/doctors"
+              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+            >
+              <IconStethoscope size={20} className="mr-3" />
+              Doctors
+            </a>
+          </li>
+          <li>
+            <a
+              href="/labreportform"
+              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+            >
+              <IconFileText size={20} className="mr-3" />
+              Lab Reports
+            </a>
+          </li>
+          <li>
+            <a
+              href="/login"
+              className="flex items-center p-2 text-gray-700 hover:bg-red-500 hover:text-white transition-colors rounded-md"
+            >
+              <IconLogout size={20} className="mr-3" />
+              Logout
+            </a>
+          </li>
+        </ul>
+      </Paper>
     <div className="min-h-screen bg-gray-100 p-4">
+      
       {/* AppBar with Search Box and Add Button */}
       <AppBar position="static" sx={{ backgroundColor: '#1976d2', borderBottom: '1px solid #ddd' }}>
         <Toolbar className="flex justify-between items-center">
@@ -253,6 +302,7 @@ function TestRequestsPage() {
           </TableBody>
         </Table>
       </TableContainer>
+    </div>
     </div>
   );
 }

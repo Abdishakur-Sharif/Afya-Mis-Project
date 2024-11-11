@@ -11,8 +11,8 @@ import Report from './Components/Report';
 import Appointments from './Components/Appointments';
 import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
-import Patient from './Componets/patients';
-import TestRequestsPage from './Componets/testrequest';
+import Patient from './Components/Patients';
+import TestRequestsPage from './Components/Testrequest';
 
 function App() {
   return (
@@ -41,16 +41,12 @@ function App() {
             path="/appointments"
             element={<Appointments />}
           />
-          <Route
-            path="/patientrecords"
-            element={<PatientRecords />}
-          />
           <Route path="/report" element={<Report />} />
 
           {/* Default Route */}
           <Route path="/" element={<h1>Welcome to the Hospital Management System</h1>} />
           <Route path="/patients" element={<Patient/>} />
-          <Route path="/testrequests" element={<TestRequestsPage/>} />
+          <Route path="/lab-dashboard" element={<TestRequestsPage/>} />
         </Routes>
       </>
     </AuthProvider>
