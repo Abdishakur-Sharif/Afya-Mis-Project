@@ -6,9 +6,10 @@ function PatientRecords({ patients }) {
   const [editedPatient, setEditedPatient] = useState({});
 
   // Filter patients based on the search term
-  const filteredPatients = patients.filter(patient =>
-    patient.patientName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+ const filteredPatients = (patients || []).filter(patient =>
+  patient.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 
   // Handle edit button click
   const handleEditClick = (index, patient) => {

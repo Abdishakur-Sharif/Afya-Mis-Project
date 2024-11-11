@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+
+  <rect x="10" y="10" width="100" height="100" rx="20" ry="20" fill="black"/>
+
+  <!-- Rounded Rectangle for the Cross symbol -->
+  <rect x="40" y="20" width="40" height="80" rx="10" ry="10" fill="#2D9CDB"/>
+  <rect x="20" y="40" width="80" height="40" rx="10" ry="10" fill="#2D9CDB"/>
+
+  <!-- Circle cutout for a modern feel, offsetting the cross -->
+  <circle cx="60" cy="60" r="30" fill="white" />
+
+  
+</svg>

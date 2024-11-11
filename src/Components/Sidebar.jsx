@@ -13,11 +13,11 @@ import {
 function Sidebar() {
   return (
     <Paper shadow="sm" className="w-52 h-[500px]  ">
-      <h2 className="text-2xl mb-5 mr-28">Afya</h2>
+      <h2 className="text-4xl ml-5 my-5 mr-28 font-bold text-blue-500">Afya</h2>
       <ul className="space-y-4">
         <li>
           <a
-            href="/dashboard"
+            href="/doctordashboard"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconHome size={20} className="mr-3" />
@@ -35,7 +35,7 @@ function Sidebar() {
         </li>
         <li>
           <a
-            href="/patients"
+            href="/patientrecords"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconUsers size={20} className="mr-3" />
@@ -53,7 +53,7 @@ function Sidebar() {
         </li>
         <li>
           <a
-            href="/reports"
+            href="/report"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconFileText size={20} className="mr-3" />
