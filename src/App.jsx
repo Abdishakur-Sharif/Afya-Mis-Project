@@ -7,7 +7,7 @@ import Login from './Components/LogIn';
 import Registration from './Components/Registration';
 import Doctordashboard from './Components/Doctordashboard';
 import LabReportForm from './Components/LabReportForm';
-import Report from './Components/Report';
+import Report from './Componets/Report';
 import Appointments from './Components/Appointments';
 import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
