@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import login from "../assets/Images/login.jpg";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { doSignInWithEmailAndPassword } from "../firebase/auth";
+import { doSignInWithEmailAndPassword, getUserRole } from "../firebase/auth";
 import { useAuth } from "../context/authcontext";
 
 function LogIn() {
@@ -14,27 +14,53 @@ function LogIn() {
 
   // Handles the email and password sign-in
   const onSubmit = async (e) => {
-    e.preventDefault();
-    setIsSigningIn(true);
-    try {
-      await doSignInWithEmailAndPassword(email, password);
-      setEmail("");  // Clear the email field
-      setPassword("");  // Clear the password field
-      navigate('/home'); // Navigate to home page after login
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-    setIsSigningIn(false);
-  };
+  e.preventDefault();
+  setIsSigningIn(true);
+  setErrorMessage(""); // Clear any previous error messages
 
-  // Display a loading message while authentication status is being determined
-  if (loading) {
-    return <div>Loading...</div>;
+  try {
+    // Firebase sign-in call
+    const userCredential = await doSignInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    // Retrieve the user role from Firestore
+    const role = await getUserRole(user);
+
+    // Redirect based on user role
+    if (role === "admin") {
+      navigate('/admin-dashboard');
+    } else if (role === "doctor") {
+      navigate('/doctordashboard');
+    } else if (role === "lab-staff") {
+      navigate('/lab-dashboard');
+    } else if (role === "pharmacy") {
+      navigate('/pharmacy-dashboard');
+    } else if (role === "receptionist") {
+      navigate('/receptionist-dashboard');
+    } else {
+      navigate('/'); // Default to home page if no role is found or it's a generic role
+    }
+
+    // Clear input fields after successful login
+    setEmail("");
+    setPassword("");
+
+  } catch (error) {
+    setErrorMessage(error.message); // Display error message
+  } finally {
+    setIsSigningIn(false); // Stop loading state
   }
+};
+
+// Display a loading message while authentication status is being determined
+if (loading) {
+  return <div>Loading...</div>;
+}
 
   return (
     <div>
       <div className="w-full mb-8">
+        <p>{}</p>
         <h1 className="text-5xl font-bold text-blue-500 relative ml-20">
           Afya 
         </h1>
