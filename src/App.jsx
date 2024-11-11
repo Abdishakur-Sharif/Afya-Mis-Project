@@ -12,7 +12,14 @@ import Appointments from './Components/Appointments';
 import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
 import Patient from './Componets/patients';
-import TestRequestsPage from './Componets/testrequest';
+import TestRequestsPage from './Components/testrequest';
+import AdminDashboard from './Components/AdminDashboard';
+import AddDoctorForm from './Components/AddDoctorForm';
+import AddDoctorList from './Components/AddDoctorList';
+import AddNurseForm from './Components/AddNurseForm';
+import AddNurseList from './Components/AddNurseList';
+import AddStaffForm from './Components/AddStaffForm';
+import AddStaffList from './Components/AddStaffList';
 
 function App() {
   return (
@@ -51,10 +58,21 @@ function App() {
           <Route path="/" element={<h1>Welcome to the Hospital Management System</h1>} />
           <Route path="/patients" element={<Patient/>} />
           <Route path="/testrequests" element={<TestRequestsPage/>} />
+          <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/doctors" element={<AddDoctorList />} />
+          <Route path="/doctors/add" element={<AddDoctorForm />} />
+          <Route path="/nurses" element={<AddNurseList />} />
+          <Route path="/nurses/add" element={<AddNurseForm />} />
+          <Route path="/staffs" element={<AddStaffList />} />
+          <Route path="/staffs/add" element={<AddStaffForm />} />
         </Routes>
       </>
     </AuthProvider>
   );
 }
 
+
+
+
 export default App;
+
