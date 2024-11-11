@@ -23,7 +23,7 @@ import AddStaffList from './Components/AddStaffList';
 
 function App() {
   return (
-    <AuthProvider> {/* Wrap the entire app in AuthProvider to provide context */}
+    <AuthProvider> {/* Wrap the entire app in AuthProvider to provide context for */}
       <>
         <Routes>
           {/* Public Routes */}
