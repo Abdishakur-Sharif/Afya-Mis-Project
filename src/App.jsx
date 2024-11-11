@@ -19,7 +19,7 @@ import AddDoctorList from './Components/AddDoctorList';
 import AddNurseForm from './Components/AddNurseForm';
 import AddNurseList from './Components/AddNurseList';
 import AddStaffForm from './Components/AddStaffForm';
-import iAddStaffList from './Components/AddStaffList';
+import AddStaffList from './Components/AddStaffList';
 
 function App() {
   return (
