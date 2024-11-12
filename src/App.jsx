@@ -7,12 +7,11 @@ import Login from './Components/LogIn';
 import Registration from './Components/Registration';
 import Doctordashboard from './Components/Doctordashboard';
 import LabReportForm from './Components/LabReportForm';
-import Report from './Componets/Report';
+import Report from './Components/Report';
 import Appointments from './Components/Appointments';
-import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
 import Patient from './Components/Patients';
-import TestRequestsPage from './Componennts/Testrequest';
+import TestRequestsPage from './Components/Testrequest';
 import AdminDashboard from './Components/AdminDashboard';
 import AddDoctorForm from './Components/AddDoctorForm';
 import AddDoctorList from './Components/AddDoctorList';
@@ -20,6 +19,7 @@ import AddNurseForm from './Components/AddNurseForm';
 import AddNurseList from './Components/AddNurseList';
 import AddStaffForm from './Components/AddStaffForm';
 import AddStaffList from './Components/AddStaffList';
+
 
 function App() {
   return (
@@ -51,7 +51,7 @@ function App() {
           <Route path="/report" element={<Report />} />
 
           {/* Default Route */}
-          <Route path="/" element={<h1>Welcome to the Hospital Management System</h1>} />
+          <Route path="/" element={<h1>welcome to homepage</h1>} />
           <Route path="/patients" element={<Patient/>} />
           <Route path="/lab-dashboard" element={<TestRequestsPage/>} />
           <Route path="/admindashboard" element={<AdminDashboard />} />

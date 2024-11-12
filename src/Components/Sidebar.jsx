@@ -62,7 +62,7 @@ function Sidebar() {
         </li>
         <li>
           <a
-            href="/settings"
+            href="/lab-dashboard"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconHospitalCircle size={20} className="mr-3" />

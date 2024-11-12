@@ -28,7 +28,7 @@ function LogIn() {
 
     // Redirect based on user role
     if (role === "admin") {
-      navigate('/admin-dashboard');
+      navigate('/admindashboard');
     } else if (role === "doctor") {
       navigate('/doctordashboard');
     } else if (role === "lab-staff") {
