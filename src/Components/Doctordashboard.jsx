@@ -2,25 +2,9 @@ import React, { useState } from 'react';
 import { Paper, Button } from '@mantine/core';
 import { IconUsers, IconStethoscope, IconCalendarEvent, IconCash } from '@tabler/icons-react';
 import Sidebar from './Sidebar';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import 'react-calendar/dist/Calendar.css';
 import Appointments from './Appointments';
 
-// Example data for new and old patients
-const data = [
-  { date: 'January', newPatients: 12, oldPatients: 8 },
-  { date: 'February', newPatients: 14, oldPatients: 9 },
-  { date: 'March', newPatients: 16, oldPatients: 12 },
-  { date: 'April', newPatients: 10, oldPatients: 7 },
-  { date: 'May', newPatients: 13, oldPatients: 10 },
-  { date: 'June', newPatients: 18, oldPatients: 14 },
-  { date: 'July', newPatients: 20, oldPatients: 16 },
-  { date: 'August', newPatients: 17, oldPatients: 12 },
-  { date: 'September', newPatients: 14, oldPatients: 9 },
-  { date: 'October', newPatients: 15, oldPatients: 11 },
-  { date: 'November', newPatients: 19, oldPatients: 15 },
-  { date: 'December', newPatients: 22, oldPatients: 18 },
-];
 
 const initialPatients = [
   { id: 1, name: 'Varjinia Mariane', address: '4472 Fridcost Road', disease: 'Fever', status: 'Received' },
@@ -59,13 +43,13 @@ function Doctordashboard() {
       icon: <IconStethoscope size={80} className="absolute opacity-10 right-4 top-4" />,
     },
     {
-      label: "Today's Operation",
+      label: "Lab Requests",
       value: 5,
       bgColor: 'bg-gradient-to-r from-yellow-500 to-yellow-400',
       icon: <IconCalendarEvent size={80} className="absolute opacity-10 right-4 top-4" />,
     },
     {
-      label: 'Total Appointments',
+      label: "Today's Appointments",
       value: '36',
       bgColor: 'bg-gradient-to-r from-gray-500 to-gray-400',
       icon: <IconCash size={80} className="absolute opacity-10 right-4 top-4" />,
@@ -124,21 +108,6 @@ function Doctordashboard() {
 
         {/* Appointments Section */}
         <Appointments />
-
-        {/* Area Chart */}
-        <div className="p-6 w-full" style={{ height: '500px' }}>
-          <h2 className="text-2xl mb-4">Patient Data Over the Year</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="newPatients" stroke="#8884d8" fill="#8884d8" />
-              <Area type="monotone" dataKey="oldPatients" stroke="#82ca9d" fill="#82ca9d" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
       </div>
     </div>
   );

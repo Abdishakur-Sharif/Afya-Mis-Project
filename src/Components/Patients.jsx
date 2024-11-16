@@ -91,14 +91,14 @@ function PatientPage() {
     if (!selectedPatient) return;
 
     // try {
-    //   // Replace with your backend endpoint
+    //    Replace with your backend endpoint
     //   const response = await axios.post('/api/update-patient-diagnosis', {
     //     id: selectedPatient.id,
     //     diagnosis,
     //     prescription,
     //   });
 
-    //   // Handle the response (e.g., success or failure message)
+    //    Handle the response (e.g., success or failure message)
     //   if (response.status === 200) {
     //     alert('Diagnosis updated successfully!');
     //     handleDialogClose();

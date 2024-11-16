@@ -122,6 +122,7 @@ function Registration() {
                   <option value="receptionist">Receptionist</option>
                   <option value="lab-staff">Lab Staff</option>
                   <option value="admin">Admin</option>
+                  <option value={"pharmacy"}>Pharmacy</option>
                 </select>
               </div>
 
