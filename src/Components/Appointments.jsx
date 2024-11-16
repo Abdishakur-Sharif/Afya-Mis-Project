@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { FaEdit, FaTrashAlt, FaCalendarAlt, FaClock, FaUser, FaStethoscope, FaPhoneAlt } from 'react-icons/fa';
 
+// Helper function to convert 24-hour time format to 12-hour time format with AM/PM
+const convertTo12HourFormat = (time24h) => {
+  let [hours, minutes] = time24h.split(':');
+  hours = parseInt(hours);
+
+  const modifier = hours >= 12 ? 'PM' : 'AM';
+  if (hours > 12) {
+    hours = hours - 12;
+  } else if (hours === 0) {
+    hours = 12; // Midnight case
+  }
+
+  return `${hours}:${minutes} ${modifier}`;
+};
+
 // Helper function to convert 12-hour time format to 24-hour time format
 const convertTo24HourFormat = (time12h) => {
   const [time, modifier] = time12h.split(' ');
@@ -32,7 +47,7 @@ function Appointments() {
     // Fetch appointments from the Flask API
     const fetchAppointments = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/appointments'); // Updated API URL
+        const response = await fetch('http://127.0.0.1:5555/appointments');
         if (!response.ok) {
           throw new Error('Failed to fetch appointments');
         }
@@ -72,25 +87,75 @@ function Appointments() {
         const updatedAppointments = appointments.filter((_, i) => i !== index);
         setAppointments(updatedAppointments);
         setShowSuccessMessage('Appointment canceled successfully!');
+
+        // Clear the success message after 3 seconds
+        setTimeout(() => {
+          setShowSuccessMessage('');
+        }, 3000);
       } catch (error) {
         console.error('Error canceling appointment:', error);
         setShowSuccessMessage('Failed to cancel appointment.');
+        
+        // Clear the error message after 3 seconds
+        setTimeout(() => {
+          setShowSuccessMessage('');
+        }, 3000);
       }
     }
   };
 
-  const handleUpdate = (index) => {
-    const updatedAppointments = [...appointments];
-    updatedAppointments[index] = {
-      ...updatedAppointments[index],
-      appointmentDate,
-      appointmentTime,
-    };
-    setAppointments(updatedAppointments);
-    setEditAppointment(null);
-    setAppointmentDate('');
-    setAppointmentTime('');
-    setShowSuccessMessage('Appointment rescheduled successfully!');
+  const handleUpdate = async (index) => {
+    if (!appointmentDate || !appointmentTime) {
+      alert("Please fill in both date and time.");
+      return;
+    }
+
+    const updatedAppointment = appointments[index];
+
+    try {
+      // Send a PATCH request to the server to update the appointment date and time
+      const response = await fetch(`http://127.0.0.1:5555/appointments/${updatedAppointment.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment_date: appointmentDate,
+          appointment_time: convertTo24HourFormat(appointmentTime), // Ensure time is sent in 24-hour format
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update appointment');
+      }
+
+      // Update the state with the new appointment date and time
+      const updatedAppointments = [...appointments];
+      updatedAppointments[index] = {
+        ...updatedAppointments[index],
+        appointment_date: appointmentDate,
+        appointment_time: convertTo24HourFormat(appointmentTime), // Store time in 24-hour format
+      };
+      setAppointments(updatedAppointments);
+
+      setEditAppointment(null);
+      setAppointmentDate('');
+      setAppointmentTime('');
+      setShowSuccessMessage('Appointment rescheduled successfully!');
+
+      // Clear the success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage('');
+      }, 3000);
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      setShowSuccessMessage('Failed to reschedule appointment.');
+      
+      // Clear the error message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage('');
+      }, 3000);
+    }
   };
 
   const formatDate = (date) => {
@@ -114,7 +179,7 @@ function Appointments() {
       />
       <input
         type="time"
-        value={appointmentTime}  // Time is now in 24-hour format
+        value={appointmentTime}  // Use the 24-hour format for the input
         onChange={(e) => setAppointmentTime(e.target.value)}
         className="border p-3 w-full mb-4 rounded-md shadow-sm"
       />
@@ -167,7 +232,7 @@ function Appointments() {
                 <span>{formatDate(appointment.appointment_date)}</span>
                 <span className="mx-2">|</span>
                 <FaClock className="mr-2 text-blue-500" />
-                <span>{appointment.appointment_time}</span>
+                <span>{convertTo12HourFormat(appointment.appointment_time)}</span>  {/* Convert to 12-hour format */}
               </div>
 
               <div className="mt-4 flex space-x-4">
