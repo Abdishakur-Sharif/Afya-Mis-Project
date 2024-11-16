@@ -1,91 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function PatientRegistrationForm({ onSubmit }) {
+function PatientRegistrationForm() {
   const [patientName, setPatientName] = useState('');
   const [contactInfo, setContactInfo] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
+  const [medicalHistory, setMedicalHistory] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [address, setAddress] = useState(''); // Address field
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  // Function to calculate age from date of birth
+  const calculateAge = (dob) => {
+    if (!dob) return '';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Update age whenever date of birth changes
+  useEffect(() => {
+    setAge(calculateAge(dateOfBirth));
+  }, [dateOfBirth]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if all fields are filled
-    if (!patientName || !contactInfo || !email || !address || !dateOfBirth || !gender) {
-      setErrorMessage('Please fill in all fields to register patient.');
-
-      // Clear error message after 3 seconds
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000); // 3000ms = 3 seconds
-
+    if (!patientName || !contactInfo || !email || !medicalHistory || !dateOfBirth || !gender || !address) {
+      setErrorMessage('Please fill in all fields to register the patient.');
+      setTimeout(() => setErrorMessage(''), 2000); // Error disappears after 2 seconds
       return;
     }
 
-    // Clear any existing error message if validation passes
-    setErrorMessage('');
+    setErrorMessage(''); // Reset error message before submission
 
-    // Proceed with the form submission
-    onSubmit({ patientName, contactInfo, email, address, dateOfBirth, age, gender });
-    setPatientName('');
-    setContactInfo('');
-    setEmail('');
-    setAddress('');
-    setDateOfBirth('');
-    setAge('');
-    setGender('');
-    setIsRegistered(true); // Show registration confirmation message
-  };
+    const patientData = {
+      name: patientName,
+      gender,
+      phone_number: contactInfo,
+      medical_history: medicalHistory,
+      date_of_birth: dateOfBirth,
+      email,
+      address, // Include address
+    };
 
-  const handleDateOfBirthChange = (e) => {
-    const date = e.target.value;
-    setDateOfBirth(date);
+    try {
+      const response = await fetch('http://127.0.0.1:5555/patients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(patientData),
+      });
 
-    if (date) {
-      const birthDate = new Date(date);
-      const currentDate = new Date();
-      let calculatedAge = currentDate.getFullYear() - birthDate.getFullYear();
-      const monthDifference = currentDate.getMonth() - birthDate.getMonth();
-      const dayDifference = currentDate.getDate() - birthDate.getDate();
+      const result = await response.json();
 
-      // Adjust age if the birth date hasn't occurred yet this year
-      if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
-        calculatedAge--;
+      if (response.ok) {
+        // Reset the form fields after successful registration
+        setPatientName('');
+        setContactInfo('');
+        setEmail('');
+        setMedicalHistory('');
+        setDateOfBirth('');
+        setAge('');
+        setGender('');
+        setAddress('');
+        setErrorMessage('Patient has been successfully registered!');
+        setTimeout(() => setErrorMessage(''), 2000); // Success message disappears after 2 seconds
+      } else {
+        setErrorMessage(result.message || 'An error occurred. Please try again.');
+        setTimeout(() => setErrorMessage(''), 2000); // Error disappears after 2 seconds
       }
-
-      setAge(calculatedAge);
-    } else {
-      setAge('');
+    } catch (error) {
+      setErrorMessage('Failed to register patient. Please try again later.');
+      setTimeout(() => setErrorMessage(''), 2000); // Error disappears after 2 seconds
     }
-  };
-
-  // Reset confirmation when starting a new registration
-  const resetConfirmation = () => {
-    if (isRegistered) setIsRegistered(false);
   };
 
   return (
     <div>
       <form onSubmit={handleSubmit} className="p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">Register Patient</h2>
-        
+
         <input
           type="text"
           placeholder="Patient Name"
           value={patientName}
-          onChange={(e) => { setPatientName(e.target.value); resetConfirmation(); }}
+          onChange={(e) => setPatientName(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
-        
+
         <input
           type="text"
-          placeholder="Contact Info"
+          placeholder="Contact Info (Phone Number)"
           value={contactInfo}
-          onChange={(e) => { setContactInfo(e.target.value); resetConfirmation(); }}
+          onChange={(e) => setContactInfo(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
 
@@ -93,7 +109,7 @@ function PatientRegistrationForm({ onSubmit }) {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => { setEmail(e.target.value); resetConfirmation(); }}
+          onChange={(e) => setEmail(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
 
@@ -101,18 +117,25 @@ function PatientRegistrationForm({ onSubmit }) {
           type="text"
           placeholder="Address"
           value={address}
-          onChange={(e) => { setAddress(e.target.value); resetConfirmation(); }}
+          onChange={(e) => setAddress(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
-        
+
+        <textarea
+          placeholder="Medical History"
+          value={medicalHistory}
+          onChange={(e) => setMedicalHistory(e.target.value)}
+          className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
+        />
+
         <input
           type="date"
           placeholder="Date of Birth"
           value={dateOfBirth}
-          onChange={(e) => { handleDateOfBirthChange(e); resetConfirmation(); }}
+          onChange={(e) => setDateOfBirth(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         />
-        
+
         <input
           type="number"
           placeholder="Age"
@@ -120,10 +143,10 @@ function PatientRegistrationForm({ onSubmit }) {
           disabled
           className="border p-4 mb-6 w-full rounded-lg bg-gray-200"
         />
-        
+
         <select
           value={gender}
-          onChange={(e) => { setGender(e.target.value); resetConfirmation(); }}
+          onChange={(e) => setGender(e.target.value)}
           className="border p-4 mb-6 w-full rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select Gender</option>
@@ -131,23 +154,16 @@ function PatientRegistrationForm({ onSubmit }) {
           <option value="Female">Female</option>
         </select>
 
-        <button 
-          type="submit" 
-          className="bg-blue-500 text-white p-4 w-full rounded-lg hover:bg-blue-600 transition duration-300">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-4 w-full rounded-lg hover:bg-blue-600 transition duration-300"
+        >
           Register
         </button>
       </form>
 
-      {/* Display the registration confirmation message */}
-      {isRegistered && (
-        <div className="mt-4 p-4 text-green-700 bg-green-100 rounded-lg text-center">
-          Patient has been successfully registered!
-        </div>
-      )}
-
-      {/* Display the error message if validation fails */}
       {errorMessage && (
-        <div className="mt-4 p-4 text-red-700 bg-red-100 rounded-lg text-center">
+        <div className={`mt-4 p-4 rounded-lg text-center ${errorMessage === 'Patient has been successfully registered!' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}>
           {errorMessage}
         </div>
       )}
