@@ -1,23 +1,81 @@
 import React, { useEffect, useState } from 'react';
-import { FaEdit, FaTrashAlt, FaCalendarAlt, FaClock, FaUser, FaStethoscope } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaCalendarAlt, FaClock, FaUser, FaStethoscope, FaPhoneAlt } from 'react-icons/fa';
+
+// Helper function to convert 12-hour time format to 24-hour time format
+const convertTo24HourFormat = (time12h) => {
+  const [time, modifier] = time12h.split(' ');
+  let [hours, minutes] = time.split(':');
+
+  if (modifier === 'PM' && hours !== '12') {
+    hours = (parseInt(hours) + 12).toString(); // Convert PM hours to 24-hour format
+  }
+
+  if (modifier === 'AM' && hours === '12') {
+    hours = '00'; // Convert 12 AM to 00 hours
+  }
+
+  // Pad hours and minutes with leading zeros if necessary
+  hours = hours.padStart(2, '0');
+  minutes = minutes.padStart(2, '0');
+
+  return `${hours}:${minutes}`;
+};
 
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [editAppointment, setEditAppointment] = useState(null);
   const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentTime, setAppointmentTime] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState('');
 
   useEffect(() => {
-    const storedAppointments = JSON.parse(localStorage.getItem('appointments')) || [];
-    setAppointments(storedAppointments);
+    // Fetch appointments from the Flask API
+    const fetchAppointments = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5555/appointments'); // Updated API URL
+        if (!response.ok) {
+          throw new Error('Failed to fetch appointments');
+        }
+        const data = await response.json();
+
+        // Convert time to 24-hour format before setting the state
+        const updatedAppointments = data.map((appointment) => ({
+          ...appointment,
+          appointment_time: appointment.appointment_time
+            ? convertTo24HourFormat(appointment.appointment_time)
+            : '',
+        }));
+
+        setAppointments(updatedAppointments);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchAppointments();
   }, []);
 
-  const handleCancel = (index) => {
-    if (window.confirm("Are you sure you want to cancel this appointment?")) {
-      const updatedAppointments = appointments.filter((_, i) => i !== index);
-      setAppointments(updatedAppointments);
-      localStorage.setItem('appointments', JSON.stringify(updatedAppointments));
-      setShowSuccessMessage("Appointment canceled successfully!");
+  const handleCancel = async (index) => {
+    if (window.confirm('Are you sure you want to cancel this appointment?')) {
+      const appointmentToDelete = appointments[index];
+      
+      try {
+        const response = await fetch(`http://127.0.0.1:5555/appointments/${appointmentToDelete.id}`, {
+          method: 'DELETE', // HTTP DELETE request
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to cancel appointment');
+        }
+
+        // Remove the deleted appointment from the state
+        const updatedAppointments = appointments.filter((_, i) => i !== index);
+        setAppointments(updatedAppointments);
+        setShowSuccessMessage('Appointment canceled successfully!');
+      } catch (error) {
+        console.error('Error canceling appointment:', error);
+        setShowSuccessMessage('Failed to cancel appointment.');
+      }
     }
   };
 
@@ -26,13 +84,13 @@ function Appointments() {
     updatedAppointments[index] = {
       ...updatedAppointments[index],
       appointmentDate,
+      appointmentTime,
     };
     setAppointments(updatedAppointments);
-    localStorage.setItem('appointments', JSON.stringify(updatedAppointments));
-
     setEditAppointment(null);
     setAppointmentDate('');
-    setShowSuccessMessage("Appointment rescheduled successfully!");
+    setAppointmentTime('');
+    setShowSuccessMessage('Appointment rescheduled successfully!');
   };
 
   const formatDate = (date) => {
@@ -45,21 +103,19 @@ function Appointments() {
     });
   };
 
-  const formatTime = (date) => {
-    const appointment = new Date(date);
-    return appointment.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const renderUpdateForm = () => (
     <div className="mb-6 p-4 bg-blue-100 border rounded-lg shadow-lg">
       <h3 className="text-lg font-semibold mb-4">Reschedule Appointment</h3>
       <input
-        type="datetime-local"
+        type="date"
         value={appointmentDate}
         onChange={(e) => setAppointmentDate(e.target.value)}
+        className="border p-3 w-full mb-4 rounded-md shadow-sm"
+      />
+      <input
+        type="time"
+        value={appointmentTime}  // Time is now in 24-hour format
+        onChange={(e) => setAppointmentTime(e.target.value)}
         className="border p-3 w-full mb-4 rounded-md shadow-sm"
       />
       <button
@@ -91,24 +147,35 @@ function Appointments() {
             <li key={index} className="p-4 bg-gray-50 border rounded-lg shadow-md transition-transform transform hover:scale-105">
               <div className="flex items-center mb-2">
                 <FaUser className="mr-2 text-blue-500" />
-                <strong>Patient:</strong> {appointment.patientName}
+                <strong>Patient:</strong> {appointment.patient.name}
               </div>
+
+              {/* Patient's Phone Number and Gender (No Icons, Just Text) */}
+              <div className="flex items-center mb-2 text-sm text-gray-600">
+                <FaPhoneAlt className="mr-2 text-blue-500" />
+                <span>{appointment.patient.phone_number || 'N/A'}</span>
+                <span className="mx-4">|</span>
+                <strong>Gender:</strong> {appointment.patient.gender || 'N/A'}
+              </div>
+
               <div className="flex items-center mb-2">
                 <FaStethoscope className="mr-2 text-blue-500" />
-                <strong>Doctor:</strong> {appointment.doctorName}
+                <strong>Doctor:</strong> {appointment.doctor.name}
               </div>
               <div className="flex items-center text-sm text-gray-600 mt-2">
                 <FaCalendarAlt className="mr-2 text-blue-500" />
-                <span>{formatDate(appointment.appointmentDate)}</span>
+                <span>{formatDate(appointment.appointment_date)}</span>
                 <span className="mx-2">|</span>
                 <FaClock className="mr-2 text-blue-500" />
-                <span>{formatTime(appointment.appointmentDate)}</span>
+                <span>{appointment.appointment_time}</span>
               </div>
+
               <div className="mt-4 flex space-x-4">
                 <button
                   onClick={() => {
                     setEditAppointment(index);
-                    setAppointmentDate(appointment.appointmentDate);
+                    setAppointmentDate(appointment.appointment_date);
+                    setAppointmentTime(appointment.appointment_time);
                   }}
                   className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-600 transition-all flex items-center"
                 >
