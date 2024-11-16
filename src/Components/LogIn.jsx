@@ -18,6 +18,11 @@ function LogIn() {
   setIsSigningIn(true);
   setErrorMessage(""); // Clear any previous error messages
 
+  // Validate input fields
+  if (!email || !password) {
+    setErrorMessage("Please fill in all fields");
+    return;
+  }
   try {
     // Firebase sign-in call
     const userCredential = await doSignInWithEmailAndPassword(email, password);
@@ -28,7 +33,7 @@ function LogIn() {
 
     // Redirect based on user role
     if (role === "admin") {
-      navigate('/admin-dashboard');
+      navigate('/admindashboard');
     } else if (role === "doctor") {
       navigate('/doctordashboard');
     } else if (role === "lab-staff") {
@@ -96,7 +101,7 @@ if (loading) {
                 disabled={isSigningIn}
                 className="text-white bg-blue-500 py-2 my-4 w-full rounded hover:bg-purple-700"
               >
-                LogIn
+                Log In
               </button>
 
               {/* Error Message */}

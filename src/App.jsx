@@ -53,20 +53,24 @@ import Login from './Components/LogIn';
 import Registration from './Components/Registration';
 import Doctordashboard from './Components/Doctordashboard';
 import LabReportForm from './Components/LabReportForm';
-import Report from './Componets/Report';
+import Report from './Components/Report';
 import Appointments from './Components/Appointments';
-import PatientRecords from './Components/PatientRecords';
 // import ProtectedRoute from './context/ProtectedRoute';
-import Patient from './Componets/patients';
-import TestRequestsPage from './Components/testrequest';
+import Patient from './Components/Patients';
+import TestRequestsPage from './Components/Testrequest';
 import AdminDashboard from './Components/AdminDashboard';
 import AddDoctorForm from './Components/AddDoctorForm';
-import AddDoctorList from './Components/AddDoctorList';
-import AddNurseForm from './Components/AddNurseForm';
-import AddNurseList from './Components/AddNurseList';
+import DoctorList from './Components/DoctorList';
 import AddStaffForm from './Components/AddStaffForm';
-import AddStaffList from './Components/AddStaffList';
-
+import LabTechList from './Components/LabTechList';
+import AddLabTechForm from './Components/AddLabTechForm';
+import StaffList from './Components/StaffList';
+import Hero from './Components/Hero';
+import Services from './Components/Services';
+import About from './Components/About';
+import Contact from './Components/Contact';
+import Footer from './Components/Footer';
+import './index.css';
 function App() {
   return (
     <AuthProvider> {/* Wrap the entire app in AuthProvider to provide context */}
@@ -76,7 +80,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registration" element={<Registration />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-
+          <Route path='/labtechs' element={<LabTechList />} />
+          <Route path='/addlabtechs' element={<AddLabTechForm />} />
           {/* Protected Routes (Role-Based) */}
           <Route
             path="/doctordashboard"
@@ -94,24 +99,53 @@ function App() {
             path="/appointments"
             element={<Appointments />}
           />
-          <Route
-            path="/patientrecords"
-            element={<PatientRecords />}
-          />
           <Route path="/report" element={<Report />} />
 
           {/* Default Route */}
-          <Route path="/" element={<h1>Welcome to the Hospital Management System</h1>} />
+          {/* <Route path="/" element={<h1>welcome to homepage</h1>} /> */}
           <Route path="/patients" element={<Patient/>} />
-          <Route path="/testrequests" element={<TestRequestsPage/>} />
+          <Route path="/lab-dashboard" element={<TestRequestsPage/>} />
           <Route path="/admindashboard" element={<AdminDashboard />} />
-          <Route path="/doctors" element={<AddDoctorList />} />
-          <Route path="/doctors/add" element={<AddDoctorForm />} />
-          <Route path="/nurses" element={<AddNurseList />} />
-          <Route path="/nurses/add" element={<AddNurseForm />} />
-          <Route path="/staffs" element={<AddStaffList />} />
-          <Route path="/staffs/add" element={<AddStaffForm />} />
+          <Route path="/doctors" element={<DoctorList />} />
+          <Route path="/adddoctors" element={<AddDoctorForm />} />
+          <Route path="/staffs" element={<StaffList />} />
+          <Route path="/addstaffs" element={<AddStaffForm />} />
+          <Route
+              path="/"
+              element={
+                <>
+                 
+                  <Hero />
+                  <About />
+                  <Services />
+                  <Contact />
+                  <Footer />
+                </>
+              }
+            />
         </Routes>
+         {/* <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+       
+        
+        <Box sx={{ flexGrow: 1 }}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                 <Header />
+                  <Hero />
+                  <About />
+                  <Services />
+                  <Contact />
+                </>
+              }
+            />
+          </Routes>
+        </Box>
+        
+        <Footer />
+      </Box> */}
       </>
     </AuthProvider>
   );

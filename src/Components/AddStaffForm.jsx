@@ -1,3 +1,4 @@
+// AddStaffForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,30 +7,24 @@ const AddStaffForm = () => {
   const [department, setDepartment] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
-  
-  const navigate = useNavigate(); // For navigation after success
+  const navigate = useNavigate();
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent form from reloading the page
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const newStaff = {
+      id: Date.now(),
+      name: staffName,
+      department,
+      contact,
+      email,
+    };
 
-    const newStaff = { name: staffName, department, contact, email };
+    const storedStaffs = JSON.parse(localStorage.getItem('staffs')) || [];
+    localStorage.setItem('staffs', JSON.stringify([...storedStaffs, newStaff]));
 
-    try {
-      const response = await fetch('YOUR_API_ENDPOINT_HERE', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStaff),
-      });
-
-      if (!response.ok) throw new Error('Failed to add staff');
-
-      console.log('Staff added successfully');
-      navigate('/staffs'); // Redirect to staff list after success
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error adding staff');
-    }
+    navigate('/staffs'); // Navigate to staff list after adding
   };
 
   return (

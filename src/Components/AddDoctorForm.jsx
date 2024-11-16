@@ -1,3 +1,4 @@
+// AddDoctorForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,19 +9,24 @@ const AddDoctorForm = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  // Form submit handler
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Example payload (you can replace this with your API call)
+    // Create new doctor object
     const newDoctor = {
+      id: Date.now(),  // Unique ID for each doctor
       name: doctorName,
       specialization,
       contact,
       email,
     };
 
-    console.log('Adding New Doctor:', newDoctor);
+    // Retrieve existing doctors from local storage or set to empty array if none
+    const storedDoctors = JSON.parse(localStorage.getItem('doctors')) || [];
+    // Add the new doctor to the list
+    const updatedDoctors = [...storedDoctors, newDoctor];
+    // Save the updated list back to local storage
+    localStorage.setItem('doctors', JSON.stringify(updatedDoctors));
 
     // Reset form fields
     setDoctorName('');

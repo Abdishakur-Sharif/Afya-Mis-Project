@@ -1,106 +1,149 @@
 import React from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
-import { blue } from '@mui/material/colors';
-import { motion } from 'framer-motion'; // Import motion from Framer Motion
+import { motion } from 'framer-motion';
+import hospital from '../assets/Images/hospital.mp4';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  // Text content for the heading
+  const text = "Afya: Modern Hospital Management";
+  const characters = text.split("");
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
         textAlign: 'center',
-        pt: 8,
-        pb: 6,
-        backgroundColor: blue[500], // Keep the background color (no image)
-        position: 'relative',
-        zIndex: 1,
+        textTransform: 'uppercase',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '70vh',
+        py: { xs: 12, md: 16 }, // Extra padding to separate from header
+        overflow: 'hidden',
+        marginBottom: 18, // Space for preventing overlap with the next section
       }}
     >
-      {/* Optional overlay to darken or give more contrast to the background */}
+      
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: -2,
+        }}
+      >
+        <source src={hospital} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Dark gradient overlay for improved readability */}
       <Box
         sx={{
           position: 'absolute',
           top: 0,
           left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.2)', // Optional overlay (light black) for better text visibility
-          zIndex: -1, // Ensures overlay is behind the text
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0, 0, 0, 0.4)', // Dark overlay for blending
+          backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.8))',
+          zIndex: -1,
         }}
       />
 
       <Container>
-        {/* Main Heading: Animated with scale-up and fade-in */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }} // Start smaller and below
-          animate={{ opacity: 1, scale: 1, y: 0 }} // End at normal size and position
-          transition={{
-            duration: 1.2,              // Duration for the animation
-            ease: [0.68, -0.55, 0.27, 1.55],  // Ease for a smooth, elastic-like feel
+        {/* Typing Animation for Main Heading */}
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: '500',
+            fontSize: { xs: '1.5rem', md: '2rem' },
+            fontFamily: "'Roboto', sans-serif",
+            color: '#e3f2fd', // Softer light blue color for contrast
+            mb: 2,
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '2px',
+            textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)', // Enhanced shadow for depth
           }}
         >
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 'bold',
-              mb: 2,
-              fontFamily: "'Roboto', sans-serif", // Modern font-family
-              color: 'white',  // Ensure text is white on blue background
-              textShadow: '2px 2px 6px rgba(0, 0, 0, 0.7)', // Text shadow for contrast
-            }}
-          >
-            Afya is a modern solution for comprenhensive hospital management
-          </Typography>
-        </motion.div>
+          {characters.map((char, index) => (
+            <motion.span
+              key={index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.05,
+                delay: index * 0.1,
+              }}
+            >
+              {char === " " ? "\u00A0" : char}
+            </motion.span>
+          ))}
+        </Typography>
 
-        {/* Subheading: Animated with a slight delay and fade-in effect */}
+        {/* Subheading with adjusted styling */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 1.5,        // Duration for the animation
-            delay: 0.5,           // Delay to create a staggered effect
-            ease: [0.68, -0.55, 0.27, 1.55], // Ease for a smooth transition
-          }}
+          transition={{ duration: 1.2, delay: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
         >
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
+              fontWeight: '300',
+              fontSize: { xs: '0.8rem', md: '1rem' },
+              color: '#cfd8dc', // Softer color for subheading
               mb: 4,
-              color: 'white',  // White text color to maintain visibility
-              fontFamily: "'Roboto', sans-serif", // Consistent font
-              textShadow: '1px 1px 4px rgba(0, 0, 0, 0.7)', // Slight shadow for text visibility
+              maxWidth: '600px',
+              mx: 'auto',
+              lineHeight: 1.5,
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
             }}
           >
-            Manage appointments, patient records, and healthcare services efficiently.
+            Efficiently manage appointments, patient records, and healthcare services in one platform.
           </Typography>
         </motion.div>
 
-        {/* Button: Fade-in with scale effect */}
+        {/* Button with scale animation */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 1.5,
-            delay: 1,              // Delay to make it appear after the subheading
-            ease: [0.68, -0.55, 0.27, 1.55], // Smooth and elastic easing
-          }}
+          transition={{ duration: 1, delay: 0.4, ease: [0.43, 0.13, 0.23, 0.96] }}
         >
-          <Button
-            variant="contained"
-            color="secondary"
-            size="large"
-            sx={{
-              background: 'linear-gradient(45deg, #1976d2, #4caf50)', // Gradient button for visual appeal
-              '&:hover': {
-                background: 'linear-gradient(45deg, #1565c0, #388e3c)', // Slightly darker on hover
-              },
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-              borderRadius: 3,
-              textTransform: 'none',
-            }}
-          >
-            Get Started
-          </Button>
+<Button
+  variant="contained"
+  size="large"
+  onClick={() => navigate('/login')}
+  sx={{
+    background: 'linear-gradient(90deg, #1565c0, #1e88e5)', // Gradient background
+    color: 'white',
+    px: 5,
+    py: 1.5,
+    textTransform: 'none',
+    fontWeight: '500',
+    borderRadius: 2,
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)', // Soft shadow for depth
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: 'linear-gradient(90deg, #1e88e5, #42a5f5)', // Lighter gradient on hover
+      boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.4)', // Enhanced shadow on hover
+      transform: 'scale(1.05)', // Slight scaling on hover for interaction
+    },
+  }}
+>
+  Get Started
+</Button>
+
         </motion.div>
       </Container>
     </Box>

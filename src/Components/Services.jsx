@@ -10,7 +10,7 @@ function Services() {
     { title: '24/7 Emergency', description: 'Always available to attend to your medical emergencies.', icon: <EmergencyIcon sx={{ fontSize: 50, color: '#1976d2' }} /> },
     { title: 'Specialized Care', description: 'Experienced specialists available for your health needs.', icon: <CareIcon sx={{ fontSize: 50, color: '#1976d2' }} /> },
     { title: 'General Checkup', description: 'Routine health checkups to monitor your well-being.', icon: <CheckupIcon sx={{ fontSize: 50, color: '#1976d2' }} /> },
-    { title: 'Surgical Procedures', description: 'Advanced surgical facilities with skilled surgeons.', icon: <SurgeryIcon sx={{ fontSize: 50, color: '#1976d2' }} /> },
+    { title: 'Surgery', description: 'Advanced surgical facilities with skilled surgeons.', icon: <SurgeryIcon sx={{ fontSize: 50, color: '#1976d2' }} /> },
   ];
 
   return (
@@ -24,10 +24,10 @@ function Services() {
           width: '100%',
           height: '100%',
           backgroundImage: 'url(https://images.pexels.com/photos/3259624/pexels-photo-3259624.jpeg)',  // External image URL
-          backgroundSize: 'cover',                    // Make sure the image covers the whole section
-          backgroundPosition: 'center',               // Center the image
-          zIndex: -1,                                 // Place the background behind the content
-          filter: 'blur(6px)',                         // Optional: blur the background to give focus to the content
+          backgroundSize: 'cover',                    
+          backgroundPosition: 'center',               
+          zIndex: -1,                                 
+          filter: 'blur(6px)',                         
         }}
       />
 
