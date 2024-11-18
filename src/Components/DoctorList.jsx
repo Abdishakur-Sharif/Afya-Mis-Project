@@ -21,7 +21,12 @@ const DoctorList = () => {
   return (
     <div className="min-h-screen bg-blue-50 p-6">
       <h2 className="text-3xl font-bold text-blue-600 mb-6">Doctor List</h2>
-
+      
+      {/* Button to Navigate to Admin Dashboard */}
+      <Link to="/admindashboard" className="mb-6 inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+        Admin Dashboard
+      </Link>
+      <br></br>
       {/* Button to Navigate to Add Doctor Form */}
       <Link to="/adddoctors" className="mb-6 inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
         Add New Doctor

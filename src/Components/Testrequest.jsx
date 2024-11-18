@@ -1,17 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
   Typography,
   InputBase,
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Fab,
   Table,
   TableBody,
   TableCell,
@@ -19,53 +13,49 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Badge,
-} from '@mui/material';
-import {
-  IconStethoscope,
-  IconFileText,
-  IconLogout,
-  IconHospitalCircle
-} from '@tabler/icons-react';
-import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
+  CircularProgress,
+  Checkbox,
+} from "@mui/material";
 
-// Sample data for test requests
-const testRequests = [
-  {
-    patientName: 'Flores, Juanita',
-    dob: '1989-12-03',
-    doctor: 'Dr M. Wagner',
-    testType: 'Complete Blood Count',
-    priority: 'Routine',
-    ciDate: '2023-09-14, 08:30 AM',
-    status: 'Completed',
-    dueDate: '2023-09-15, 02:00 PM',
-  },
-  {
-    patientName: 'Cooper, Kristin',
-    dob: '1991-03-21',
-    doctor: 'Dr R. Greensmit',
-    testType: 'Lipid Profile',
-    priority: 'Urgent',
-    ciDate: '2023-09-14, 10:15 AM',
-    status: 'In-Progress',
-    dueDate: '2023-09-15, 01:00 PM',
-  },
-];
+import { Search as SearchIcon, Add as AddIcon } from "@mui/icons-material";
+
+// Fetch endpoint
+const API_URL = "http://127.0.0.1:5555/tests";
 
 function TestRequestsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [openDialog, setOpenDialog] = useState(false);
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const [newRequest, setNewRequest] = useState({
-    patientName: '',
-    dob: '',
-    doctor: '',
-    testType: '',
-    priority: 'Routine',
-    ciDate: '',
-    status: 'Pending',
-    dueDate: '',
+    patientName: "",
+    dob: "",
+    doctor: "",
+    testType: "",
+    ciDate: "",
+    status: "Pending",
+    dueDate: "",
   });
+  const [testRequests, setTestRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch tests on mount
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Failed to fetch test requests.");
+        const data = await response.json();
+        setTestRequests(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTests();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -84,225 +74,197 @@ function TestRequestsPage() {
     setNewRequest({ ...newRequest, [name]: value });
   };
 
-  const handleAddRequest = () => {
-    testRequests.push(newRequest);
-    setNewRequest({
-      patientName: '',
-      dob: '',
-      doctor: '',
-      testType: '',
-      priority: 'Routine',
-      ciDate: '',
-      status: 'Pending',
-      dueDate: '',
+  const handleViewReport = (testId) => {
+    const selectedTest = testRequests.find((request) => request.id === testId);
+    navigate("/labreportform", {
+      state: {
+        patientName: selectedTest.patient?.name,
+        doctorName: selectedTest.doctor?.name,
+        testType: selectedTest.test_types?.test_name,
+        labTech: selectedTest.lab_tech?.name,
+      },
     });
-    setOpenDialog(false);
   };
 
-  const filteredRequests = testRequests.filter((request) =>
-    request.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.testType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+
+  const handleCheckboxChange = async (testId, status) => {
+    try {
+      const response = await fetch(`${API_URL}/${testId}`, {
+        // Use testId here
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }), // Send the updated status to the backend
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text(); // Get the response text for more details
+        throw new Error(`Failed to update status: ${errorText}`);
+      }
+
+      const updatedTest = await response.json();
+
+      // Update the test list in the state to reflect the new status
+      setTestRequests((prevRequests) =>
+        prevRequests.map((test) =>
+          test.id === testId ? { ...test, status: updatedTest.status } : test
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status");
+    }
+  };
+
+
+  const filteredRequests = testRequests.filter((request) => {
+    return (
+      (request.patient.name &&
+        request.patient.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.doctor.name &&
+        String(request.doctor.name)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.test_types?.test_name &&
+        String(request.test_types.test_name)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.status &&
+        String(request.status)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()))
+    );
+  });
 
   return (
-    <div className='flex flex-row'>
-      <Paper shadow="sm" className="md:w-1/4 w-full h-auto md:h-[500px] p-4">
-        <h2 className="text-4xl ml-5 my-5 font-bold text-blue-500 mb-5 md:mr-10">Afya</h2>
+    <div className="flex flex-col md:flex-row">
+      {/* Sidebar */}
+      <aside className="bg-blue-500 text-white p-5 md:w-1/4 w-full min-h-screen">
+        <h2 className="text-3xl font-bold mb-8">Afya</h2>
         <ul className="space-y-4">
           <li>
             <a
               href="/lab-dashboard"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconHospitalCircle size={20} className="mr-3" />
               Lab Requests
             </a>
           </li>
           <li>
             <a
               href="/doctors"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconStethoscope size={20} className="mr-3" />
               Doctors
             </a>
           </li>
           <li>
             <a
               href="/labreportform"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconFileText size={20} className="mr-3" />
               Lab Reports
             </a>
           </li>
           <li>
             <a
               href="/login"
-              className="flex items-center p-2 text-gray-700 hover:bg-red-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md bg-red-500 hover:bg-red-700 transition"
             >
-              <IconLogout size={20} className="mr-3" />
               Logout
             </a>
           </li>
         </ul>
-      </Paper>
-    <div className="min-h-screen bg-gray-100 p-4">
-      
-      {/* AppBar with Search Box and Add Button */}
-      <AppBar position="static" sx={{ backgroundColor: '#1976d2', borderBottom: '1px solid #ddd' }}>
-        <Toolbar className="flex justify-between items-center">
-          <Typography variant="h6" sx={{ color: '#ffffff' }}>Test Requests</Typography>
+      </aside>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor: '#ffffff',
-              borderRadius: '4px',
-              padding: '0 10px',
-              width: '300px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <SearchIcon color="action" />
-            <InputBase
-              placeholder="Search by name, doctor, test..."
-              sx={{ marginLeft: '8px', flex: 1 }}
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-          </Box>
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-5">
+        <AppBar position="static" className="bg-blue-600 mb-5">
+          <Toolbar className="flex justify-between">
+            <Typography variant="h6" className="text-white">
+              Test Requests
+            </Typography>
+            <div className="flex items-center bg-white p-2 rounded-lg shadow-md">
+              <SearchIcon className="text-gray-400" />
+              <InputBase
+                placeholder="Search"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="ml-2 w-full"
+              />
+            </div>
+          </Toolbar>
+        </AppBar>
 
-          {/* Add Button - Floating Action Button with Plus Icon */}
-          <Fab
-            color="primary"
-            size="small"
-            onClick={handleDialogOpen}
-            sx={{ marginLeft: '20px' }}
-          >
-            <AddIcon />
-          </Fab>
-        </Toolbar>
-      </AppBar>
 
-      {/* Dialog for Adding New Request */}
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Add New Test Request</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Patient Name"
-            fullWidth
-            name="patientName"
-            value={newRequest.patientName}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          {/* Simple Date Picker for Date of Birth */}
-          <TextField
-            label="Date of Birth"
-            type="date"
-            fullWidth
-            name="dob"
-            value={newRequest.dob}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            label="Doctor"
-            fullWidth
-            name="doctor"
-            value={newRequest.doctor}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="Test Type"
-            fullWidth
-            name="testType"
-            value={newRequest.testType}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="CI Date"
-            fullWidth
-            name="ciDate"
-            value={newRequest.ciDate}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="Due Date"
-            fullWidth
-            name="dueDate"
-            value={newRequest.dueDate}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="secondary">Cancel</Button>
-          <Button onClick={handleAddRequest} color="primary">Add Request</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Table with Filtered Requests */}
-      <TableContainer component={Paper} sx={{ marginTop: '20px', borderRadius: '8px', overflow: 'hidden' }} className="shadow-lg">
-        <Table>
-          <TableHead sx={{ backgroundColor: '#e3f2fd' }}>
-            <TableRow>
-              <TableCell className="font-bold text-blue-800">Patient Name</TableCell>
-              <TableCell className="font-bold text-blue-800">Date of Birth</TableCell>
-              <TableCell className="font-bold text-blue-800">Doctor</TableCell>
-              <TableCell className="font-bold text-blue-800">Test Type</TableCell>
-              <TableCell className="font-bold text-blue-800">Priority</TableCell>
-              <TableCell className="font-bold text-blue-800">CI Date</TableCell>
-              <TableCell className="font-bold text-blue-800">Status</TableCell>
-              <TableCell className="font-bold text-blue-800">Due Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredRequests.map((request, index) => (
-              <TableRow key={index} hover className="transition-all">
-                <TableCell>{request.patientName}</TableCell>
-                <TableCell>{request.dob}</TableCell>
-                <TableCell>{request.doctor}</TableCell>
-                <TableCell>{request.testType}</TableCell>
-                <TableCell>
-                  <Badge
-                    badgeContent={request.priority}
-                    color={request.priority === 'Urgent' ? 'error' : 'default'}
-                    sx={{ textTransform: 'capitalize' }}
-                  />
-                </TableCell>
-                <TableCell>{request.ciDate}</TableCell>
-                <TableCell>
-                  <Typography
-                    sx={{
-                      color:
-                        request.status === 'Completed'
-                          ? '#2e7d32'
-                          : request.status === 'In-Progress'
-                          ? '#ffb300'
-                          : '#d32f2f',
-                    }}
-                  >
-                    {request.status}
-                  </Typography>
-                </TableCell>
-                <TableCell>{request.dueDate}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+        {loading ? (
+          <CircularProgress />
+        ) : error ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          <TableContainer component={Paper} className="rounded-lg shadow">
+            <Table>
+              <TableHead className="bg-blue-200">
+                <TableRow>
+                  <TableCell>Patient Name</TableCell>
+                  <TableCell>Doctor</TableCell>
+                  <TableCell>Lab Tech</TableCell>
+                  <TableCell>Test Type</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell>{request.patient?.name}</TableCell>
+                    <TableCell>{request.doctor?.name}</TableCell>
+                    <TableCell>{request.lab_tech?.name}</TableCell>
+                    <TableCell>{request.test_types?.test_name}</TableCell>
+                    <TableCell>{request.status}</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={request.status === "Completed"} // Check if status is "Completed"
+                        onChange={() =>
+                          handleCheckboxChange(
+                            request.id,
+                            request.status === "pending"
+                              ? "completed"
+                              : "pending"
+                          )
+                        }
+                        sx={{
+                          color:
+                            request.status === "Completed"
+                              ? "#388e3c"
+                              : "#d32f2f", // Green for completed, Red for pending
+                          "&.Mui-checked": {
+                            color:
+                              request.status === "Completed"
+                                ? "#388e3c"
+                                : "#d32f2f", // Green when checked for completed, Red for pending
+                          },
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleViewReport(request.id)}
+                      >
+                        Add Report
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </main>
     </div>
   );
 }
