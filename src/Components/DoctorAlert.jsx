@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import socket from "../context/socket";
+import socket from "./context/Socket.jsx";
+
 
 const DoctorAlert = () => {
     const [alerts, setAlerts] = useState([]);

@@ -4,6 +4,7 @@ import { IconUsers, IconStethoscope, IconCalendarEvent, IconCash } from '@tabler
 import Sidebar from './Sidebar';
 import 'react-calendar/dist/Calendar.css';
 import Appointments from './Appointments';
+import DoctorAlert from './DoctorAlert';
 
 
 const initialPatients = [
@@ -108,6 +109,7 @@ function Doctordashboard() {
 
         {/* Appointments Section */}
         <Appointments />
+        <DoctorAlert />
       </div>
     </div>
   );

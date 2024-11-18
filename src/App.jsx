@@ -25,6 +25,8 @@ import About from './Components/About';
 import Contact from './Components/Contact';
 import Footer from './Components/Footer';
 import './index.css';
+import TestAlertButton from './Components/TestAlertButton';
+import DoctorAlert from './Components/DoctorAlert';
 function App() {
   return (
     <AuthProvider> {/* Wrap the entire app in AuthProvider to provide context */}
@@ -36,6 +38,9 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path='/labtechs' element={<LabTechList />} />
           <Route path='/addlabtechs' element={<AddLabTechForm />} />
+          {/* alert route */}
+          <Route path="/doctorsalerts" element={<DoctorAlert />} />
+          <Route path="/testalertbutton" element={<TestAlertButton />} />
           {/* Protected Routes (Role-Based) */}
           <Route
             path="/doctordashboard"
