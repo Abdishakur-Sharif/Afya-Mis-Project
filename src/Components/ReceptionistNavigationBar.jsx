@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FaRegUser, FaCalendarAlt, FaFileAlt, FaClipboardList } from 'react-icons/fa';
+import { FaRegUser, FaCalendarAlt, FaFileAlt, FaClipboardList, FaSignOutAlt } from 'react-icons/fa';
 
-function NavigationBar({ onSelectSection }) {
+function NavigationBar({ onSelectSection, onLogout }) {
   // State to toggle mobile menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -40,6 +40,12 @@ function NavigationBar({ onSelectSection }) {
             className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300 flex items-center">
             <FaClipboardList className="inline mr-2" /> Appointments
           </button>
+          {/* Logout button */}
+          <button 
+            onClick={onLogout} 
+            className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300 flex items-center">
+            <FaSignOutAlt className="inline mr-2" /> Logout
+          </button>
         </div>
       )}
 
@@ -64,6 +70,12 @@ function NavigationBar({ onSelectSection }) {
           onClick={() => onSelectSection('appointments')} 
           className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300 flex items-center">
           <FaClipboardList className="inline mr-2" /> Appointments
+        </button>
+        {/* Logout button */}
+        <button 
+          onClick={onLogout} 
+          className="w-full text-left p-3 rounded-lg text-lg hover:bg-blue-500 focus:outline-none transition duration-300 flex items-center">
+          <FaSignOutAlt className="inline mr-2" /> Logout
         </button>
       </div>
     </nav>
