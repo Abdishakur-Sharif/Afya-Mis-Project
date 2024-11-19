@@ -11,6 +11,10 @@ import Report from './Components/Report';
 import Appointments from './Components/Appointments';
 // import ProtectedRoute from './context/ProtectedRoute';
 import Patient from './Components/Patients';
+import ConsultationPage from './Components/ConsultationPage';
+import DiagnosisPage from './Components/DiagnosisPage';
+import ReportPage from './Components/ReportPage';
+
 import TestRequestsPage from './Components/Testrequest';
 import AdminDashboard from './Components/AdminDashboard';
 import AddDoctorForm from './Components/AddDoctorForm';
@@ -64,6 +68,9 @@ function App() {
           <Route path="/adddoctors" element={<AddDoctorForm />} />
           <Route path="/staffs" element={<StaffList />} />
           <Route path="/addstaffs" element={<AddStaffForm />} />
+          <Route path="/patient/:id/Consultations" element={<ConsultationPage />} />
+        <Route path="/patient/:id/Diagnosis" element={<DiagnosisPage />} />
+        <Route path="/patient/:id/reports" element={<ReportPage />} />
           <Route
               path="/"
               element={
