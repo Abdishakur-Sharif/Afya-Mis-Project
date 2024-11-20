@@ -1,23 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  InputBase,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  CircularProgress,
-  Checkbox,
-} from "@mui/material";
-
-import { Search as SearchIcon, Add as AddIcon } from "@mui/icons-material";
 
 // Fetch endpoint
 const API_URL = "http://127.0.0.1:5555/tests";
@@ -25,15 +7,6 @@ const API_URL = "http://127.0.0.1:5555/tests";
 function TestRequestsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [newRequest, setNewRequest] = useState({
-    patientName: "",
-    dob: "",
-    doctor: "",
-    testType: "",
-    ciDate: "",
-    status: "Pending",
-    dueDate: "",
-  });
   const [testRequests, setTestRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -61,19 +34,6 @@ function TestRequestsPage() {
     setSearchQuery(event.target.value);
   };
 
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setNewRequest({ ...newRequest, [name]: value });
-  };
-
   const handleViewReport = (testId) => {
     const selectedTest = testRequests.find((request) => request.id === testId);
     navigate("/labreportform", {
@@ -86,26 +46,24 @@ function TestRequestsPage() {
     });
   };
 
+  const handleCheckboxChange = async (testId, currentStatus) => {
+    const newStatus = currentStatus === "pending" ? "completed" : "pending";
 
-  const handleCheckboxChange = async (testId, status) => {
     try {
       const response = await fetch(`${API_URL}/${testId}`, {
-        // Use testId here
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status }), // Send the updated status to the backend
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text(); // Get the response text for more details
+        const errorText = await response.text();
         throw new Error(`Failed to update status: ${errorText}`);
       }
 
       const updatedTest = await response.json();
-
-      // Update the test list in the state to reflect the new status
       setTestRequests((prevRequests) =>
         prevRequests.map((test) =>
           test.id === testId ? { ...test, status: updatedTest.status } : test
@@ -116,7 +74,6 @@ function TestRequestsPage() {
       alert("Failed to update status");
     }
   };
-
 
   const filteredRequests = testRequests.filter((request) => {
     return (
@@ -182,87 +139,83 @@ function TestRequestsPage() {
 
       {/* Main Content */}
       <main className="flex-1 bg-gray-100 p-5">
-        <AppBar position="static" className="bg-blue-600 mb-5">
-          <Toolbar className="flex justify-between">
-            <Typography variant="h6" className="text-white">
-              Test Requests
-            </Typography>
-            <div className="flex items-center bg-white p-2 rounded-lg shadow-md">
-              <SearchIcon className="text-gray-400" />
-              <InputBase
-                placeholder="Search"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="ml-2 w-full"
-              />
-            </div>
-          </Toolbar>
-        </AppBar>
-
+        <div className="flex justify-between mb-5">
+          <h1 className="text-xl font-bold">Test Requests</h1>
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-1 rounded-md w-1/3 text-sm"
+          />
+        </div>
 
         {loading ? (
-          <CircularProgress />
+          <div className="text-center text-sm">Loading...</div>
         ) : error ? (
-          <Typography color="error">{error}</Typography>
+          <div className="text-red-500 text-center text-sm">{error}</div>
         ) : (
-          <TableContainer component={Paper} className="rounded-lg shadow">
-            <Table>
-              <TableHead className="bg-blue-200">
-                <TableRow>
-                  <TableCell>Patient Name</TableCell>
-                  <TableCell>Doctor</TableCell>
-                  <TableCell>Lab Tech</TableCell>
-                  <TableCell>Test Type</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto text-sm">
+              <thead className="bg-blue-200">
+                <tr>
+                  <th className="px-2 py-1">Patient Name</th>
+                  <th className="px-2 py-1">Doctor</th>
+                  <th className="px-2 py-1">Lab Tech</th>
+                  <th className="px-2 py-1">Test Type</th>
+                  <th className="px-2 py-1">Status</th>
+                  <th className="px-2 py-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell>{request.patient?.name}</TableCell>
-                    <TableCell>{request.doctor?.name}</TableCell>
-                    <TableCell>{request.lab_tech?.name}</TableCell>
-                    <TableCell>{request.test_types?.test_name}</TableCell>
-                    <TableCell>{request.status}</TableCell>
-                    <TableCell>
-                      <Checkbox
-                        checked={request.status === "Completed"} // Check if status is "Completed"
-                        onChange={() =>
-                          handleCheckboxChange(
-                            request.id,
-                            request.status === "pending"
-                              ? "completed"
-                              : "pending"
-                          )
-                        }
-                        sx={{
-                          color:
-                            request.status === "Completed"
-                              ? "#388e3c"
-                              : "#d32f2f", // Green for completed, Red for pending
-                          "&.Mui-checked": {
-                            color:
-                              request.status === "Completed"
-                                ? "#388e3c"
-                                : "#d32f2f", // Green when checked for completed, Red for pending
-                          },
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
+                  <tr key={request.id}>
+                    <td className="border px-2 py-1">
+                      {request.patient?.name}
+                    </td>
+                    <td className="border px-2 py-1">{request.doctor?.name}</td>
+                    <td className="border px-2 py-1">
+                      {request.lab_tech?.name}
+                    </td>
+                    <td className="border px-2 py-1">
+                      {request.test_types?.test_name}
+                    </td>
+                    <td className="border px-2 py-1">
+                      <span
+                        className={`inline-block p-1 rounded-md text-white ${
+                          request.status === "completed"
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                      >
+                        {request.status === "completed"
+                          ? "Completed"
+                          : "Pending"}
+                      </span>
+                    </td>
+                    <td className="border px-2 py-1">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={request.status === "completed"}
+                          onChange={() =>
+                            handleCheckboxChange(request.id, request.status)
+                          }
+                          className="form-checkbox h-4 w-4 text-green-500 checked:bg-green-500"
+                        />
+                      </label>
+                      <button
                         onClick={() => handleViewReport(request.id)}
+                        className="ml-2 bg-blue-500 text-white py-1 px-2 rounded-md text-xs"
                       >
                         Add Report
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
         )}
       </main>
     </div>

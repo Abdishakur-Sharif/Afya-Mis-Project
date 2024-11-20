@@ -35,6 +35,19 @@ function Payment() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate phone number for MPESA
+    const isValidPhoneNumber = (number) => {
+      return /^\d{12}$/.test(number) && number.startsWith("254");
+    };
+
+    if (paymentMethod === "mpesa" && !isValidPhoneNumber(phoneNumber)) {
+      alert(
+        "Please enter a valid phone number in international format (e.g., 2547XXXXXXXX)."
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const paymentData = {
         phone_number: phoneNumber,
@@ -53,9 +66,10 @@ function Payment() {
 
       const result = await paymentResponse.json();
       if (paymentResponse.ok) {
-        alert("Payment added successfully");
-        navigate("/receptionist-dashboard"); // Redirect to dashboard
+        alert("Payment added successfully!");
+        setTimeout(() => navigate("/receptionist-dashboard"), 2000);
       } else {
+        console.error("Payment error:", result.error);
         alert(`Error: ${result.error || "Payment failed"}`);
       }
     } catch (error) {
@@ -66,6 +80,7 @@ function Payment() {
     }
   };
 
+  
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Add Payment</h2>
