@@ -42,7 +42,7 @@ function Sidebar() {
             Patients
           </a>
         </li>
-        <li>
+        {/* <li>
           <a
             href="/doctors"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
@@ -50,7 +50,7 @@ function Sidebar() {
             <IconStethoscope size={20} className="mr-3" />
             Doctors
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             href="/report"
