@@ -1,39 +1,49 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Import Axios for making API requests
 
 const AddLabTechForm = () => {
   const [labtechname, setLabTechName] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+  const [successMessage, setSuccessMessage] = useState(""); // State for success messages
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Create new labtech object
     const newLabTech = {
-      id: Date.now(),
       name: labtechname,
-      contact,
       email,
+      phone_number: contact, // Match the backend field names
     };
 
-    // Retrieve existing labtechs from local storage or set to empty array if none
-    const storedLabTechs = JSON.parse(localStorage.getItem("labtechs")) || [];
+    try {
+      // Send POST request to the backend
+      const response = await axios.post("http://127.0.0.1:5555/lab_techs", newLabTech);
 
-    // Add the new labtech to the list
-    const updatedLabTechs = [...storedLabTechs, newLabTech];
+      // Reset form fields
+      setLabTechName("");
+      setContact("");
+      setEmail("");
 
-    // Save the updated list back to local storage
-    localStorage.setItem("labtechs", JSON.stringify(updatedLabTechs));
+      // Set success message
+      setSuccessMessage("Lab Technician added successfully!");
 
-    // Reset form fields
-    setLabTechName("");
-    setContact("");
-    setEmail("");
-
-    // Navigate back to the labtechs list
-    navigate("/labtechs");
+      // Navigate back to the labtechs list after a short delay
+      setTimeout(() => {
+        navigate("/labtechs");
+      }, 2000); // Redirect after 2 seconds
+    } catch (error) {
+      // Handle error response
+      if (error.response) {
+        setErrorMessage(error.response.data.message); // Set error message from backend
+      } else {
+        setErrorMessage("An error occurred while adding the lab technician.");
+      }
+    }
   };
 
   return (
@@ -42,6 +52,21 @@ const AddLabTechForm = () => {
         <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">
           Add New LabTech
         </h2>
+        
+        {/* Display error message if exists */}
+        {errorMessage && (
+          <div className="mb-4 text-red-600 text-center">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Display success message if exists */}
+        {successMessage && (
+          <div className="mb-4 text-green-600 text-center">
+            {successMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-blue-600 mb-2">LabTech Name</label>

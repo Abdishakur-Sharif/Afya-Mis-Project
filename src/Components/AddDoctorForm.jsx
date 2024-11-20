@@ -1,47 +1,68 @@
-// AddDoctorForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AddDoctorForm = () => {
   const [doctorName, setDoctorName] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // State for success message
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Create new doctor object
     const newDoctor = {
-      id: Date.now(),  // Unique ID for each doctor
       name: doctorName,
-      specialization,
-      contact,
       email,
+      phone_number: contact, // Updated to match backend
+      speciality: specialization, // Updated to match backend
     };
 
-    // Retrieve existing doctors from local storage or set to empty array if none
-    const storedDoctors = JSON.parse(localStorage.getItem('doctors')) || [];
-    // Add the new doctor to the list
-    const updatedDoctors = [...storedDoctors, newDoctor];
-    // Save the updated list back to local storage
-    localStorage.setItem('doctors', JSON.stringify(updatedDoctors));
+    console.log('Sending doctor data:', newDoctor); // Log the data being sent
 
-    // Reset form fields
-    setDoctorName('');
-    setSpecialization('');
-    setContact('');
-    setEmail('');
+    try {
+      // Send POST request to the backend using Axios
+      const response = await axios.post('http://127.0.0.1:5555/doctors', newDoctor);
 
-    // Navigate back to the doctors list
-    navigate('/doctors');
+      if (response.status !== 201) {
+        throw new Error('Failed to add doctor');
+      }
+
+      // Set success message
+      setSuccessMessage('Doctor added successfully!');
+
+      // Reset form fields
+      setDoctorName('');
+      setSpecialization('');
+      setContact('');
+      setEmail('');
+
+      // Optionally navigate back to the doctors list after a delay
+      setTimeout(() => {
+        navigate('/doctors');
+      }, 2000); // Navigate after 2 seconds
+
+    } catch (error) {
+      console.error('Error adding doctor:', error.response ? error.response.data : error.message);
+      // Optionally: Show an error message to the user
+    }
   };
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
         <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">Add New Doctor</h2>
+
+        {/* Display success message */}
+        {successMessage && (
+          <div className="mb-4 text-green-600 text-center">
+            {successMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-blue-600 mb-2">Doctor Name</label>
@@ -85,7 +106,7 @@ const AddDoctorForm = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
             Add Doctor
           </button>
