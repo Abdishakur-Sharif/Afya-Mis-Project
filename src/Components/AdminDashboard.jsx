@@ -1,121 +1,155 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
 const AdminDashboard = () => {
+  const [analyticsData] = useState({
+    doctors: {
+      total: 45,
+      recent: 5,
+      chart: [
+        { month: 'Jan', count: 30 },
+        { month: 'Feb', count: 35 },
+        { month: 'Mar', count: 40 },
+        { month: 'Apr', count: 45 }
+      ]
+    },
+    labtechs: {
+      total: 22,
+      recent: 3,
+      chart: [
+        { month: 'Jan', count: 15 },
+        { month: 'Feb', count: 18 },
+        { month: 'Mar', count: 20 },
+        { month: 'Apr', count: 22 }
+      ]
+    },
+    patients: {
+      total: 350,
+      recent: 25,
+      chart: [
+        { month: 'Jan', count: 250 },
+        { month: 'Feb', count: 290 },
+        { month: 'Mar', count: 320 },
+        { month: 'Apr', count: 350 }
+      ]
+    },
+    staff: {
+      total: 60,
+      recent: 8,
+      chart: [
+        { month: 'Jan', count: 45 },
+        { month: 'Feb', count: 50 },
+        { month: 'Mar', count: 55 },
+        { month: 'Apr', count: 60 }
+      ]
+    }
+  });
+
+  const dashboardItems = [
+    {
+      title: "Doctors Management",
+      description: "Comprehensive doctor profile management",
+      route: "/doctors",
+      icon: "👩‍⚕️",
+      stats: analyticsData.doctors
+    },
+    {
+      title: "Laboratory Management",
+      description: "Advanced lab technician tracking",
+      route: "/labtechs",
+      icon: "🔬",
+      stats: analyticsData.labtechs
+    },
+    {
+      title: "Staff Coordination",
+      description: "Strategic personnel management",
+      route: "/staffs",
+      icon: "👥",
+      stats: analyticsData.staff
+    },
+    {
+      title: "User Access Control",
+      description: "Secure role-based permissions",
+      route: "/registration",
+      icon: "🔐",
+      stats: { total: 100, recent: 15 }
+    },
+    {
+      title: "Patient Care Center",
+      description: "Holistic patient record management",
+      route: "/patients",
+      icon: "❤️",
+      stats: analyticsData.patients
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-blue-50 p-8">
-      <h2 className="text-3xl font-bold text-blue-700 mb-8">Admin Dashboard</h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-10">
+      <div className="container mx-auto">
+        <h2 className="text-4xl font-extralight tracking-tight text-slate-800 mb-12 text-center">
+          Administrative Dashboard
+        </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {/* Doctors Management */}
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Manage Doctors
-          </h3>
-          <p className="text-gray-600 mb-6">
-            View, add, or remove doctors in the system. Keep track of their
-            details .
-          </p>
-          <Link
-            to="/doctors"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            Manage Doctors
-          </Link>
-        </div>
-        {/* LabTech Management */}
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Manage LabTech
-          </h3>
-          <p className="text-gray-600 mb-6">
-            View, add, or remove LabTech in the system. Keep track of their
-            details .
-          </p>
-          <Link
-            to="/labtechs"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            Manage LabTechs
-          </Link>
-        </div>
-        {/* Staff Management */}
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Manage Staff
-          </h3>
-          <p className="text-gray-600 mb-6">
-            View, add, or remove staff members. Manage your team effectively to
-            improve operations.
-          </p>
-          <Link
-            to="/staffs"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            Manage Staff
-          </Link>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            User Management
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Manage roles, permissions, and user accounts for a secure and
-            compliant system.
-          </p>
-          <Link
-            to="/registration"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            Manage Users
-          </Link>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Patient Management
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Manage patient records, appointments, and medical history.
-          </p>
-          <Link
-            to="/patients"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            Manage Patients
-          </Link>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Reports & Analytics
-          </h3>
-          <p className="text-gray-600 mb-6">
-            View detailed reports and analytics to track the system’s
-            performance and growth.
-          </p>
-          <Link
-            to="/reports"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            View Reports
-          </Link>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow transform hover:scale-105">
-          <h3 className="text-2xl font-semibold text-blue-700 mb-4">
-            Billing & Payments
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Track invoices, payments, and manage financial transactions for
-            patients and services.
-          </p>
-          <Link
-            to="/billing"
-            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors ease-in-out duration-200"
-          >
-            View Billing
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {dashboardItems.map((item, index) => (
+            <div 
+              key={index} 
+              className="bg-white rounded-2xl shadow-lg border border-slate-100 
+                         hover:shadow-xl transition-all duration-300 
+                         transform hover:-translate-y-2 overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <span className="text-3xl mr-4">{item.icon}</span>
+                  <h3 className="text-xl font-semibold text-slate-800">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="text-slate-600 text-sm mb-4 h-12">
+                  {item.description}
+                </p>
+                
+                {item.stats && (
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Total: {item.stats.total}</span>
+                      <span>Recent: {item.stats.recent}</span>
+                    </div>
+                    {item.stats.chart && (
+                      <div className="h-20 mt-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={item.stats.chart}>
+                            <XAxis dataKey="month" hide />
+                            <YAxis hide />
+                            <Tooltip />
+                            <Line 
+                              type="monotone" 
+                              dataKey="count" 
+                              stroke="#6366f1" 
+                              strokeWidth={2}
+                              dot={false}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <Link
+                  to={item.route}
+                  className="block w-full text-center py-3 px-4 
+                             bg-gradient-to-r from-indigo-500 to-blue-600 
+                             text-white rounded-lg 
+                             hover:from-indigo-600 hover:to-blue-700 
+                             transition-colors duration-300"
+                >
+                  Manage {item.title.replace("Management", "")}
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

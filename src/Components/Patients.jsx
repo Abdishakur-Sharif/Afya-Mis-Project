@@ -1,184 +1,182 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  InputBase,
-  Tabs,
-  Tab,
-  Box,
-  Avatar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Grid,
-  Button,
-  Container,
+  AppBar, Toolbar, IconButton, InputBase, Box, Avatar, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Typography, Menu, MenuItem, Button, Container,
+  Chip, Stack, Tooltip, CircularProgress
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  MoreVert as MoreIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
-import { jsPDF } from 'jspdf'; // Import jsPDF
-import axios from 'axios'; // Import axios for backend request
+import { Search as SearchIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const initialPatientsData = [
-  { id: 1, name: 'Willie Jennie', phone: '(302) 555-0107', email: 'willie.jennings@mail.com', address: '8309 Barby Hill', registered: 'Mar 12, 2021', lastVisit: 'Jun 05, 2021', treatment: 'Tooth Scaling + Bleaching', avatar: '', active: true },
-  { id: 2, name: 'Michelle Rivera', phone: '(208) 555-0112', email: 'michelle.rivera@mail.com', address: '534 Victoria Trail', registered: 'Mar 12, 2021', lastVisit: 'May 03, 2021', treatment: 'Tooth Scaling + Veneer', avatar: '', active: false },
-];
+const BASE_URL = 'http://127.0.0.1:5555';
+const POLLING_INTERVAL = 30000; // Poll every 30 seconds
 
-function PatientPage() {
-  const [tabValue, setTabValue] = useState(0);
+function PatientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [patientsData, setPatientsData] = useState(initialPatientsData);
+  const [patientsData, setPatientsData] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [prescription, setPrescription] = useState('');
-  const [diagnosis, setDiagnosis] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const navigate = useNavigate();
+
+  // Function to fetch patients data without appointments
+  const fetchPatients = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}/patients`);
+      setPatientsData(response.data);
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
+
+  // Set up polling
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetchPatients();
+    }, POLLING_INTERVAL);
+
+    return () => clearInterval(pollInterval);
+  }, [fetchPatients]);
 
   const handleSearchChange = (event) => setSearchQuery(event.target.value);
 
-  const handlePatientClick = (patient) => {
-    setSelectedPatient(patient);
-    setPrescription('');
-    setDiagnosis('');
-    setOpenDialog(true);
+  const handleManualRefresh = () => {
+    fetchPatients();
   };
 
-  const handleDialogClose = () => {
-    setOpenDialog(false);
+  const handleDeletePatient = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/patients/${id}`);
+      setPatientsData((prevData) => prevData.filter((patient) => patient.id !== id));
+      handleCloseMenu();
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+    }
+  };
+
+  const handleMenuClick = (event, patient) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedPatient(patient);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
     setSelectedPatient(null);
   };
 
-  const handleDeletePatient = (id) => {
-    setPatientsData((prevData) => prevData.filter((patient) => patient.id !== id));
+  const handleRedirectToConsultations = () => {
+    navigate(`/patient/${selectedPatient.id}/consultations`);
+    handleCloseMenu();
   };
 
-  // Function to download patient data as PDF
-  const handleDownloadPatientData = () => {
-    if (!selectedPatient) return;
-
-    const doc = new jsPDF();
-    doc.setFontSize(12);
-    doc.text('Patient Details', 10, 10);
-
-    doc.text(`Name: ${selectedPatient.name}`, 10, 20);
-    doc.text(`Phone: ${selectedPatient.phone}`, 10, 30);
-    doc.text(`Email: ${selectedPatient.email}`, 10, 40);
-    doc.text(`Address: ${selectedPatient.address}`, 10, 50);
-    doc.text(`Registered: ${selectedPatient.registered}`, 10, 60);
-    doc.text(`Last Visit: ${selectedPatient.lastVisit}`, 10, 70);
-    doc.text(`Last Treatment: ${selectedPatient.treatment}`, 10, 80);
-    doc.text(`Diagnosis: ${diagnosis}`, 10, 90);
-    doc.text(`Prescription: ${prescription}`, 10, 100);
-
-    doc.save(`${selectedPatient.name}_details.pdf`);
+  const handleRedirectToDiagnosis = () => {
+    navigate(`/patient/${selectedPatient.id}/diagnosis`);
+    handleCloseMenu();
   };
 
-  // Function to update the patient diagnosis and prescription in the backend
-  const handleUpdatePatientData = async () => {
-    if (!selectedPatient) return;
-
-    // try {
-    //    Replace with your backend endpoint
-    //   const response = await axios.post('/api/update-patient-diagnosis', {
-    //     id: selectedPatient.id,
-    //     diagnosis,
-    //     prescription,
-    //   });
-
-    //    Handle the response (e.g., success or failure message)
-    //   if (response.status === 200) {
-    //     alert('Diagnosis updated successfully!');
-    //     handleDialogClose();
-    //   } else {
-    //     alert('Failed to update diagnosis.');
-    //   }
-    // } catch (error) {
-    //   console.error('Error updating patient diagnosis:', error);
-    //   alert('An error occurred while updating the diagnosis.');
-    // }
+  const handleRedirectToReports = () => {
+    navigate(`/patient/${selectedPatient.id}/reports`);
+    handleCloseMenu();
   };
 
   const filteredPatients = patientsData.filter((patient) =>
     patient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const formatLastUpdate = (date) => {
+    return date.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
   return (
-    <Container className="flex flex-col h-screen w-full overflow-hidden fixed">
-      {/* Top Toolbar */}
-      <AppBar position="static" color="primary" className="mb-2">
-        <Toolbar className="flex justify-between px-2 py-1">
-          <Typography variant="h5" className="font-semibold">Patient Management</Typography>
-          <Box className="flex items-center bg-white rounded px-1">
-            <IconButton><SearchIcon className="text-gray-600" /></IconButton>
+    <Container sx={{ height: '100vh', display: 'flex', flexDirection: 'column', py: 2 }}>
+      <AppBar position="static" sx={{ mb: 2, borderRadius: 1 }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Patient Management
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mr: 2 }}>
+            <Typography variant="body2" color="inherit">
+              Last updated: {formatLastUpdate(lastUpdate)}
+            </Typography>
+            <Tooltip title="Refresh data">
+              <IconButton 
+                color="inherit" 
+                onClick={handleManualRefresh}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  <RefreshIcon />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Paper
+            component="form"
+            sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+          >
+            <IconButton sx={{ p: '10px' }}>
+              <SearchIcon />
+            </IconButton>
             <InputBase
-              placeholder="Search patients…"
-              className="ml-2 text-sm"
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search patients..."
               value={searchQuery}
               onChange={handleSearchChange}
             />
-          </Box>
+          </Paper>
         </Toolbar>
       </AppBar>
 
-      {/* Tabs for Active/Inactive Treatments */}
-      <Tabs
-        value={tabValue}
-        onChange={(e, val) => setTabValue(val)}
-        indicatorColor="secondary"
-        textColor="secondary"
-        aria-label="treatment tabs"
-        className="mb-2"
-      >
-        <Tab label="Active Treatment" className="font-semibold" />
-        <Tab label="Inactive Treatment" className="font-semibold" />
-      </Tabs>
-
-      {/* Patient Table */}
-      <TableContainer component={Paper} className="shadow-lg rounded mt-2  flex-grow overflow-auto">
-        <Table aria-label="patient table">
-          <TableHead className="bg-gray-100">
+      <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Table stickyHeader>
+          <TableHead>
             <TableRow>
-              <TableCell className="font-semibold">Patient Name</TableCell>
-              <TableCell className="font-semibold">Phone</TableCell>
-              <TableCell className="font-semibold">Email</TableCell>
-              <TableCell className="font-semibold">Address</TableCell>
-              <TableCell className="font-semibold">Registered</TableCell>
-              <TableCell className="font-semibold">Last Visit</TableCell>
-              <TableCell className="font-semibold">Last Treatment</TableCell>
-              <TableCell className="font-semibold">Actions</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Gender</TableCell>
+              <TableCell>Age</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredPatients.map((patient) => (
-              <TableRow key={patient.id} style={{ cursor: 'pointer' }}>
-                <TableCell onClick={() => handlePatientClick(patient)}>
-                  <Box className="flex items-center">
-                    <Avatar className="bg-primary mr-1">{patient.avatar || patient.name[0]}</Avatar>
+              <TableRow
+                key={patient.id}
+                hover
+                sx={{ cursor: 'pointer' }}
+              >
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar>{patient.name[0]}</Avatar>
                     <Typography>{patient.name}</Typography>
                   </Box>
                 </TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.phone}</TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.email}</TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.address}</TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.registered}</TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.lastVisit}</TableCell>
-                <TableCell onClick={() => handlePatientClick(patient)}>{patient.treatment}</TableCell>
+                <TableCell>{patient.gender || 'N/A'}</TableCell>
+                <TableCell>{patient.date_of_birth}</TableCell>
+                <TableCell>{patient.phone_number || 'N/A'}</TableCell>
+                <TableCell>{patient.email || 'N/A'}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleDeletePatient(patient.id)} sx={{ padding: 1 }}>
-                    <DeleteIcon color="error" />
+                  <IconButton onClick={(e) => handleMenuClick(e, patient)}>
+                    <MoreVertIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -187,65 +185,20 @@ function PatientPage() {
         </Table>
       </TableContainer>
 
-      {/* Patient Details Modal */}
-      {selectedPatient && (
-        <Dialog open={openDialog} onClose={handleDialogClose}>
-          <DialogTitle>Patient Details</DialogTitle>
-          <DialogContent sx={{ padding: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              {selectedPatient.name}
-            </Typography>
-            <Typography  variant="body2" color="teal">
-              Phone: {selectedPatient.phone}
-            </Typography>
-            <Typography variant="body2" color="teal">
-              Email: {selectedPatient.email}
-            </Typography>
-            <Typography variant="body2" color="teal">
-              Address: {selectedPatient.address}
-            </Typography>
-            <Typography variant="body2" color="teal" gutterBottom>
-              Last Treatment: {selectedPatient.treatment}
-            </Typography>
-
-            <Grid container spacing={2} marginTop={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Diagnosis"
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={diagnosis}
-                  onChange={(e) => setDiagnosis(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Prescription"
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={prescription}
-                  onChange={(e) => setPrescription(e.target.value)}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions sx={{ padding: 1 }}>
-            <Button onClick={handleDialogClose} color="secondary" sx={{ paddingX: 3 }}>
-              Close
-            </Button>
-            <Button color="primary" variant="contained" onClick={handleDownloadPatientData} sx={{ paddingX: 3 }}>
-              Download PDF
-            </Button>
-            <Button color="secondary" variant="outlined" onClick={handleUpdatePatientData} sx={{ paddingX: 3 }}>
-              Update
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={handleRedirectToConsultations}>Consultation</MenuItem>
+        <MenuItem onClick={handleRedirectToDiagnosis}>Diagnosis</MenuItem>
+        <MenuItem onClick={handleRedirectToReports}>Report</MenuItem>
+        <MenuItem onClick={() => handleDeletePatient(selectedPatient?.id)}>
+          <DeleteIcon sx={{ mr: 1 }} /> Delete
+        </MenuItem>
+      </Menu>
     </Container>
   );
 }
 
-export default PatientPage;
+export default PatientsPage;

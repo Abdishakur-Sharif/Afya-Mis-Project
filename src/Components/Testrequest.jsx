@@ -1,308 +1,223 @@
-import React, { useState } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  InputBase,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Fab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Badge,
-} from '@mui/material';
-import {
-  IconStethoscope,
-  IconFileText,
-  IconLogout,
-  IconHospitalCircle
-} from '@tabler/icons-react';
-import { Search as SearchIcon, Add as AddIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-// Sample data for test requests
-const testRequests = [
-  {
-    patientName: 'Flores, Juanita',
-    dob: '1989-12-03',
-    doctor: 'Dr M. Wagner',
-    testType: 'Complete Blood Count',
-    priority: 'Routine',
-    ciDate: '2023-09-14, 08:30 AM',
-    status: 'Completed',
-    dueDate: '2023-09-15, 02:00 PM',
-  },
-  {
-    patientName: 'Cooper, Kristin',
-    dob: '1991-03-21',
-    doctor: 'Dr R. Greensmit',
-    testType: 'Lipid Profile',
-    priority: 'Urgent',
-    ciDate: '2023-09-14, 10:15 AM',
-    status: 'In-Progress',
-    dueDate: '2023-09-15, 01:00 PM',
-  },
-];
+// Fetch endpoint
+const API_URL = "http://127.0.0.1:5555/tests";
 
 function TestRequestsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [openDialog, setOpenDialog] = useState(false);
-  const [newRequest, setNewRequest] = useState({
-    patientName: '',
-    dob: '',
-    doctor: '',
-    testType: '',
-    priority: 'Routine',
-    ciDate: '',
-    status: 'Pending',
-    dueDate: '',
-  });
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [testRequests, setTestRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch tests on mount
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Failed to fetch test requests.");
+        const data = await response.json();
+        setTestRequests(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTests();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setNewRequest({ ...newRequest, [name]: value });
-  };
-
-  const handleAddRequest = () => {
-    testRequests.push(newRequest);
-    setNewRequest({
-      patientName: '',
-      dob: '',
-      doctor: '',
-      testType: '',
-      priority: 'Routine',
-      ciDate: '',
-      status: 'Pending',
-      dueDate: '',
+  const handleViewReport = (testId) => {
+    const selectedTest = testRequests.find((request) => request.id === testId);
+    navigate("/labreportform", {
+      state: {
+        patientName: selectedTest.patient?.name,
+        doctorName: selectedTest.doctor?.name,
+        testType: selectedTest.test_types?.test_name,
+        labTech: selectedTest.lab_tech?.name,
+      },
     });
-    setOpenDialog(false);
   };
 
-  const filteredRequests = testRequests.filter((request) =>
-    request.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.doctor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.testType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleCheckboxChange = async (testId, currentStatus) => {
+    const newStatus = currentStatus === "pending" ? "completed" : "pending";
+
+    try {
+      const response = await fetch(`${API_URL}/${testId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update status: ${errorText}`);
+      }
+
+      const updatedTest = await response.json();
+      setTestRequests((prevRequests) =>
+        prevRequests.map((test) =>
+          test.id === testId ? { ...test, status: updatedTest.status } : test
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status");
+    }
+  };
+
+  const filteredRequests = testRequests.filter((request) => {
+    return (
+      (request.patient.name &&
+        request.patient.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.doctor.name &&
+        String(request.doctor.name)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.test_types?.test_name &&
+        String(request.test_types.test_name)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      (request.status &&
+        String(request.status)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()))
+    );
+  });
 
   return (
-    <div className='flex flex-row'>
-      <Paper shadow="sm" className="md:w-1/4 w-full h-auto md:h-[500px] p-4">
-        <h2 className="text-4xl ml-5 my-5 font-bold text-blue-500 mb-5 md:mr-10">Afya</h2>
+    <div className="flex flex-col md:flex-row">
+      {/* Sidebar */}
+      <aside className="bg-blue-500 text-white p-5 md:w-1/4 w-full min-h-screen">
+        <h2 className="text-3xl font-bold mb-8">Afya</h2>
         <ul className="space-y-4">
           <li>
             <a
               href="/lab-dashboard"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconHospitalCircle size={20} className="mr-3" />
               Lab Requests
             </a>
           </li>
           <li>
             <a
               href="/doctors"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconStethoscope size={20} className="mr-3" />
               Doctors
             </a>
           </li>
           <li>
             <a
               href="/labreportform"
-              className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
-              <IconFileText size={20} className="mr-3" />
               Lab Reports
             </a>
           </li>
           <li>
             <a
               href="/login"
-              className="flex items-center p-2 text-gray-700 hover:bg-red-500 hover:text-white transition-colors rounded-md"
+              className="block py-2 px-4 rounded-md bg-red-500 hover:bg-red-700 transition"
             >
-              <IconLogout size={20} className="mr-3" />
               Logout
             </a>
           </li>
         </ul>
-      </Paper>
-    <div className="min-h-screen bg-gray-100 p-4">
-      
-      {/* AppBar with Search Box and Add Button */}
-      <AppBar position="static" sx={{ backgroundColor: '#1976d2', borderBottom: '1px solid #ddd' }}>
-        <Toolbar className="flex justify-between items-center">
-          <Typography variant="h6" sx={{ color: '#ffffff' }}>Test Requests</Typography>
+      </aside>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor: '#ffffff',
-              borderRadius: '4px',
-              padding: '0 10px',
-              width: '300px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <SearchIcon color="action" />
-            <InputBase
-              placeholder="Search by name, doctor, test..."
-              sx={{ marginLeft: '8px', flex: 1 }}
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-          </Box>
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-5">
+        <div className="flex justify-between mb-5">
+          <h1 className="text-xl font-bold">Test Requests</h1>
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-1 rounded-md w-1/3 text-sm"
+          />
+        </div>
 
-          {/* Add Button - Floating Action Button with Plus Icon */}
-          <Fab
-            color="primary"
-            size="small"
-            onClick={handleDialogOpen}
-            sx={{ marginLeft: '20px' }}
-          >
-            <AddIcon />
-          </Fab>
-        </Toolbar>
-      </AppBar>
-
-      {/* Dialog for Adding New Request */}
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Add New Test Request</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Patient Name"
-            fullWidth
-            name="patientName"
-            value={newRequest.patientName}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          {/* Simple Date Picker for Date of Birth */}
-          <TextField
-            label="Date of Birth"
-            type="date"
-            fullWidth
-            name="dob"
-            value={newRequest.dob}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            label="Doctor"
-            fullWidth
-            name="doctor"
-            value={newRequest.doctor}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="Test Type"
-            fullWidth
-            name="testType"
-            value={newRequest.testType}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="CI Date"
-            fullWidth
-            name="ciDate"
-            value={newRequest.ciDate}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-          <TextField
-            label="Due Date"
-            fullWidth
-            name="dueDate"
-            value={newRequest.dueDate}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '16px' }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="secondary">Cancel</Button>
-          <Button onClick={handleAddRequest} color="primary">Add Request</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Table with Filtered Requests */}
-      <TableContainer component={Paper} sx={{ marginTop: '20px', borderRadius: '8px', overflow: 'hidden' }} className="shadow-lg">
-        <Table>
-          <TableHead sx={{ backgroundColor: '#e3f2fd' }}>
-            <TableRow>
-              <TableCell className="font-bold text-blue-800">Patient Name</TableCell>
-              <TableCell className="font-bold text-blue-800">Date of Birth</TableCell>
-              <TableCell className="font-bold text-blue-800">Doctor</TableCell>
-              <TableCell className="font-bold text-blue-800">Test Type</TableCell>
-              <TableCell className="font-bold text-blue-800">Priority</TableCell>
-              <TableCell className="font-bold text-blue-800">CI Date</TableCell>
-              <TableCell className="font-bold text-blue-800">Status</TableCell>
-              <TableCell className="font-bold text-blue-800">Due Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredRequests.map((request, index) => (
-              <TableRow key={index} hover className="transition-all">
-                <TableCell>{request.patientName}</TableCell>
-                <TableCell>{request.dob}</TableCell>
-                <TableCell>{request.doctor}</TableCell>
-                <TableCell>{request.testType}</TableCell>
-                <TableCell>
-                  <Badge
-                    badgeContent={request.priority}
-                    color={request.priority === 'Urgent' ? 'error' : 'default'}
-                    sx={{ textTransform: 'capitalize' }}
-                  />
-                </TableCell>
-                <TableCell>{request.ciDate}</TableCell>
-                <TableCell>
-                  <Typography
-                    sx={{
-                      color:
-                        request.status === 'Completed'
-                          ? '#2e7d32'
-                          : request.status === 'In-Progress'
-                          ? '#ffb300'
-                          : '#d32f2f',
-                    }}
-                  >
-                    {request.status}
-                  </Typography>
-                </TableCell>
-                <TableCell>{request.dueDate}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+        {loading ? (
+          <div className="text-center text-sm">Loading...</div>
+        ) : error ? (
+          <div className="text-red-500 text-center text-sm">{error}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto text-sm">
+              <thead className="bg-blue-200">
+                <tr>
+                  <th className="px-2 py-1">Patient Name</th>
+                  <th className="px-2 py-1">Doctor</th>
+                  <th className="px-2 py-1">Lab Tech</th>
+                  <th className="px-2 py-1">Test Type</th>
+                  <th className="px-2 py-1">Status</th>
+                  <th className="px-2 py-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td className="border px-2 py-1">
+                      {request.patient?.name}
+                    </td>
+                    <td className="border px-2 py-1">{request.doctor?.name}</td>
+                    <td className="border px-2 py-1">
+                      {request.lab_tech?.name}
+                    </td>
+                    <td className="border px-2 py-1">
+                      {request.test_types?.test_name}
+                    </td>
+                    <td className="border px-2 py-1">
+                      <span
+                        className={`inline-block p-1 rounded-md text-white ${
+                          request.status === "completed"
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                      >
+                        {request.status === "completed"
+                          ? "Completed"
+                          : "Pending"}
+                      </span>
+                    </td>
+                    <td className="border px-2 py-1">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={request.status === "completed"}
+                          onChange={() =>
+                            handleCheckboxChange(request.id, request.status)
+                          }
+                          className="form-checkbox h-4 w-4 text-green-500 checked:bg-green-500"
+                        />
+                      </label>
+                      <button
+                        onClick={() => handleViewReport(request.id)}
+                        className="ml-2 bg-blue-500 text-white py-1 px-2 rounded-md text-xs"
+                      >
+                        Add Report
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

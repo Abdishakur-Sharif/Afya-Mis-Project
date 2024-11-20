@@ -3,6 +3,7 @@ import registration from "../assets/Images/registration.jpg";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { doCreateUserWithEmailAndPassword, doSignInWithGoogle, setUserRole } from "../firebase/auth"; 
 import { useAuth } from "../context/authcontext";
+import { Link } from "react-router-dom";
 
 function Registration() {
   const navigate = useNavigate(); // Initialize navigate
@@ -69,6 +70,12 @@ function Registration() {
       <div className="w-full mb-8">
         <h1 className="text-5xl font-bold text-blue-500 relative ml-20">Afya</h1>
         <div className="w-full h-0.5 bg-gray-400 mt-2"></div>
+        <br></br>
+        {/* Button to Navigate to Admin Dashboard */}
+      <Link to="/admindashboard" className="mb-6 inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+        Admin Dashboard
+      </Link>
+      <br></br>
       </div>
       <div className="w-full min-h-screen flex justify-center items-center py-12">
         <div className="w-full max-w-4xl bg-white shadow-lg flex flex-col md:flex-row items-center rounded-lg overflow-hidden">
