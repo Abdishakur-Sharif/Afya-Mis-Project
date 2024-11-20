@@ -24,7 +24,7 @@ function Sidebar() {
             Dashboard
           </a>
         </li>
-        <li>
+        {/* <li>
           <a
             href="/appointments"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
@@ -32,7 +32,7 @@ function Sidebar() {
             <IconCalendarEvent size={20} className="mr-3" />
             Appointments
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             href="/patients"
@@ -42,7 +42,7 @@ function Sidebar() {
             Patients
           </a>
         </li>
-        <li>
+        {/* <li>
           <a
             href="/doctors"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
@@ -50,7 +50,7 @@ function Sidebar() {
             <IconStethoscope size={20} className="mr-3" />
             Doctors
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             href="/report"
@@ -62,7 +62,7 @@ function Sidebar() {
         </li>
         <li>
           <a
-            href="/addlabrequests"
+            href="/addtestrequest"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconHospitalCircle size={20} className="mr-3" />
