@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const AddTestRequest = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +10,48 @@ const AddTestRequest = () => {
     testTypeName: "",
   });
   const [message, setMessage] = useState("");
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [labTechs, setLabTechs] = useState([]);
+  const [testTypes, setTestTypes] = useState([]);
+
+  useEffect(() => {
+    // Fetch data for dropdowns
+    const fetchData = async () => {
+      try {
+        const patientResponse = await fetch("http://127.0.0.1:5555/patients");
+        const doctorResponse = await fetch("http://127.0.0.1:5555/doctors");
+        const labTechResponse = await fetch("http://127.0.0.1:5555/lab_techs");
+        const testTypeResponse = await fetch(
+          "http://127.0.0.1:5555/test-types"
+        );
+
+        if (patientResponse.ok) {
+          const patientData = await patientResponse.json();
+          setPatients(patientData); // Assuming data is an array of patients
+        }
+
+        if (doctorResponse.ok) {
+          const doctorData = await doctorResponse.json();
+          setDoctors(doctorData); // Assuming data is an array of doctors
+        }
+
+        if (labTechResponse.ok) {
+          const labTechData = await labTechResponse.json();
+          setLabTechs(labTechData); // Assuming data is an array of lab techs
+        }
+
+        if (testTypeResponse.ok) {
+          const testTypeData = await testTypeResponse.json();
+          setTestTypes(testTypeData); // Assuming data is an array of test types
+        }
+      } catch (error) {
+        setMessage(`Error fetching data: ${error.message}`);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array ensures this runs once after initial render
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +143,8 @@ const AddTestRequest = () => {
             <option value="completed">Completed</option>
           </select>
         </div>
+
+        {/* Patient Name Dropdown */}
         <div>
           <label
             className="block text-gray-700 font-medium"
@@ -108,16 +152,24 @@ const AddTestRequest = () => {
           >
             Patient Name
           </label>
-          <input
-            type="text"
+          <select
             id="patientName"
             name="patientName"
             value={formData.patientName}
             onChange={handleChange}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
             required
-          />
+          >
+            <option value="">Select Patient</option>
+            {patients.map((patient) => (
+              <option key={patient.id} value={patient.name}>
+                {patient.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Doctor Name Dropdown */}
         <div>
           <label
             className="block text-gray-700 font-medium"
@@ -125,16 +177,24 @@ const AddTestRequest = () => {
           >
             Doctor Name
           </label>
-          <input
-            type="text"
+          <select
             id="doctorName"
             name="doctorName"
             value={formData.doctorName}
             onChange={handleChange}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
             required
-          />
+          >
+            <option value="">Select Doctor</option>
+            {doctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.name}>
+                {doctor.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Lab Tech Name Dropdown */}
         <div>
           <label
             className="block text-gray-700 font-medium"
@@ -142,16 +202,24 @@ const AddTestRequest = () => {
           >
             Lab Tech Name
           </label>
-          <input
-            type="text"
+          <select
             id="labTechName"
             name="labTechName"
             value={formData.labTechName}
             onChange={handleChange}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
             required
-          />
+          >
+            <option value="">Select Lab Tech</option>
+            {labTechs.map((labTech) => (
+              <option key={labTech.id} value={labTech.name}>
+                {labTech.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Test Type Name Dropdown */}
         <div>
           <label
             className="block text-gray-700 font-medium"
@@ -159,16 +227,23 @@ const AddTestRequest = () => {
           >
             Test Type Name
           </label>
-          <input
-            type="text"
+          <select
             id="testTypeName"
             name="testTypeName"
             value={formData.testTypeName}
             onChange={handleChange}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
             required
-          />
+          >
+            <option value="">Select Test Type</option>
+            {testTypes.map((testType) => (
+              <option key={testType.id} value={testType.test_name}>
+                {testType.test_name}
+              </option>
+            ))}
+          </select>
         </div>
+
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
