@@ -13,31 +13,9 @@ import {
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AccessTime, Assignment, Science } from '@mui/icons-material';
+import axios from 'axios';
 
-// Mock data
-const mockPatientData = {
-  name: "John Doe",
-  age: 35,
-  gender: "Male",
-  phone_number: "+1 (555) 123-4567",
-  email: "john.doe@example.com",
-  date_of_birth: "1988-05-15",
-};
-
-const mockConsultations = [
-  { consultation_date: "2023-06-01", details: "Patient reported persistent headaches." },
-  { consultation_date: "2023-06-15", details: "Follow-up: Headaches have reduced in frequency." },
-];
-
-const mockDiagnoses = [
-  { created_at: "2023-06-01", diagnosis_description: "Tension headaches, possibly stress-related." },
-  { created_at: "2023-06-15", diagnosis_description: "Improving condition, continue current treatment." },
-];
-
-const mockLabResults = [
-  { test_name: "Complete Blood Count", status: "Completed", test_results: "Within normal range", created_at: "2023-06-02" },
-  { test_name: "Thyroid Function Test", status: "Completed", test_results: "Slightly elevated TSH", created_at: "2023-06-02" },
-];
+const BASE_URL = 'http://127.0.0.1:5555'; // Replace with your actual backend URL
 
 const theme = createTheme({
   palette: {
@@ -63,12 +41,17 @@ const ReportPage = ({ patientId }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setPatientData(mockPatientData);
-        setConsultations(mockConsultations);
-        setDiagnoses(mockDiagnoses);
-        setLabResults(mockLabResults);
+        const patientResponse = await axios.get(`${BASE_URL}/patients/${patientId}`);
+        const consultationsResponse = await axios.get(`${BASE_URL}/consultations/${patientId}`);
+        const diagnosesResponse = await axios.get(`${BASE_URL}/diagnoses/${patientId}`);
+        const labResultsResponse = await axios.get(`${BASE_URL}/test_reports/${patientId}`);
+
+        setPatientData(patientResponse.data);
+        setConsultations(consultationsResponse.data);
+        setDiagnoses(diagnosesResponse.data);
+        setLabResults(labResultsResponse.data);
       } catch (err) {
         setError("Error fetching patient report data");
         console.error(err);

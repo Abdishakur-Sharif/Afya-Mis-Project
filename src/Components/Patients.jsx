@@ -1,49 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   AppBar, Toolbar, IconButton, InputBase, Box, Avatar, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Typography, Menu, MenuItem, Button, Container
+  TableContainer, TableHead, TableRow, Paper, Typography, Menu, MenuItem, Button, Container,
+  Chip, Stack, Tooltip, CircularProgress
 } from '@mui/material';
-import { Search as SearchIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = 'http://127.0.0.1:5555';
+const POLLING_INTERVAL = 30000; // Poll every 30 seconds
 
 function PatientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [patientsData, setPatientsData] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null); // State for the dropdown menu
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/patients`);
-        setPatientsData(response.data);
-      } catch (error) {
-        console.error('Error fetching patient data:', error);
-      }
-    };
-    fetchPatients();
+  // Function to fetch patients data without appointments
+  const fetchPatients = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}/patients`);
+      setPatientsData(response.data);
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
+
+  // Set up polling
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetchPatients();
+    }, POLLING_INTERVAL);
+
+    return () => clearInterval(pollInterval);
+  }, [fetchPatients]);
 
   const handleSearchChange = (event) => setSearchQuery(event.target.value);
 
-  // const handlePatientClick = (patient) => {
-  //   navigate(`/patient/${patient.id}`);
-  // };
+  const handleManualRefresh = () => {
+    fetchPatients();
+  };
 
   const handleDeletePatient = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/patients/${id}`);
       setPatientsData((prevData) => prevData.filter((patient) => patient.id !== id));
+      handleCloseMenu();
     } catch (error) {
       console.error('Error deleting patient:', error);
     }
   };
 
   const handleMenuClick = (event, patient) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setSelectedPatient(patient);
   };
@@ -72,14 +94,40 @@ function PatientsPage() {
     patient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const formatLastUpdate = (date) => {
+    return date.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
   return (
     <Container sx={{ height: '100vh', display: 'flex', flexDirection: 'column', py: 2 }}>
-      {/* Top Toolbar */}
       <AppBar position="static" sx={{ mb: 2, borderRadius: 1 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Patient Management
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mr: 2 }}>
+            <Typography variant="body2" color="inherit">
+              Last updated: {formatLastUpdate(lastUpdate)}
+            </Typography>
+            <Tooltip title="Refresh data">
+              <IconButton 
+                color="inherit" 
+                onClick={handleManualRefresh}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  <RefreshIcon />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Paper
             component="form"
             sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
@@ -97,7 +145,6 @@ function PatientsPage() {
         </Toolbar>
       </AppBar>
 
-      {/* Patient Table */}
       <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
         <Table stickyHeader>
           <TableHead>
@@ -115,8 +162,7 @@ function PatientsPage() {
               <TableRow
                 key={patient.id}
                 hover
-                // onClick={() => handlePatientClick(patient)}
-                sx={{ cursor: ' pointer' }}
+                sx={{ cursor: 'pointer' }}
               >
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -125,16 +171,11 @@ function PatientsPage() {
                   </Box>
                 </TableCell>
                 <TableCell>{patient.gender || 'N/A'}</TableCell>
-                <TableCell>{(patient.date_of_birth)}</TableCell>
+                <TableCell>{patient.date_of_birth}</TableCell>
                 <TableCell>{patient.phone_number || 'N/A'}</TableCell>
                 <TableCell>{patient.email || 'N/A'}</TableCell>
                 <TableCell>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMenuClick(e, patient);
-                    }}
-                  >
+                  <IconButton onClick={(e) => handleMenuClick(e, patient)}>
                     <MoreVertIcon />
                   </IconButton>
                 </TableCell>
@@ -144,7 +185,6 @@ function PatientsPage() {
         </Table>
       </TableContainer>
 
-      {/* Dropdown Menu for Actions */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -153,7 +193,7 @@ function PatientsPage() {
         <MenuItem onClick={handleRedirectToConsultations}>Consultation</MenuItem>
         <MenuItem onClick={handleRedirectToDiagnosis}>Diagnosis</MenuItem>
         <MenuItem onClick={handleRedirectToReports}>Report</MenuItem>
-        <MenuItem onClick={() => handleDeletePatient(selectedPatient.id)}>
+        <MenuItem onClick={() => handleDeletePatient(selectedPatient?.id)}>
           <DeleteIcon sx={{ mr: 1 }} /> Delete
         </MenuItem>
       </Menu>

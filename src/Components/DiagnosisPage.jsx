@@ -1,217 +1,275 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  Box,
-  FormControl,
-  FormHelperText,
-  Divider,
-  Card,
-  CardContent,
-  Grid,
-  CircularProgress
+  Container, Typography, Paper, TextField, Button, Box,
+  Card, CardContent, Grid, Snackbar, Alert
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const BASE_URL = 'http://127.0.0.1:5555';
 
 const DiagnosisPage = () => {
-  const { id } = useParams(); // Get patient ID from URL
-  const [patient, setPatient] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [notes, setNotes] = useState([]);
-  const [currentNote, setCurrentNote] = useState('');
-  const [diagnosisDate, setDiagnosisDate] = useState('');
-  const [errors, setErrors] = useState({});
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [state, setState] = useState({
+    patient: null,
+    loading: true,
+    labData: null,
+    diagnosis: {
+      date: '',
+      notes: [],
+      currentNote: '',
+      description: ''
+    },
+    feedback: {
+      success: '',
+      error: ''
+    },
+    isSubmitting: false
+  });
 
-  // Fetch patient data when component mounts
   useEffect(() => {
-    const fetchPatientData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/patients/${id}`);
-        setPatient(response.data);
-        setLoading(false);
+        const [patientResponse, labResponse] = await Promise.all([
+          axios.get(`${BASE_URL}/patients/${id}`),
+          axios.get(`${BASE_URL}/test_reports/${id}`)
+        ]);
+
+        // Log patient data to verify appointment_id is included
+        console.log('Patient Data:', patientResponse.data);
+
+        setState(prev => ({
+          ...prev, 
+          patient: patientResponse.data,
+          labData: labResponse.data,
+          loading: false
+        }));
       } catch (error) {
-        console.error('Error fetching patient data:', error);
-        setLoading(false);
+        setState(prev => ({
+          ...prev, 
+          loading: false,
+          feedback: { error: 'Data fetch failed' }
+        }));
       }
     };
 
-    fetchPatientData();
+    fetchData();
   }, [id]);
 
-  const handleAddNote = () => {
-    if (currentNote.trim()) {
-      setNotes([...notes, currentNote]);
-      setCurrentNote('');
-    }
-  };
+  const addNote = () => {
+    const { diagnosis } = state;
+    const newNote = diagnosis.currentNote.trim();
 
-  const handleNoteEdit = (index, value) => {
-    const updatedNotes = [...notes];
-    updatedNotes[index] = value;
-    setNotes(updatedNotes);
-  };
-
-  const handleDiagnosisDateChange = (e) => {
-    setDiagnosisDate(e.target.value);
-    if (errors.diagnosisDate) {
-      setErrors({ ...errors, diagnosisDate: undefined });
+    if (newNote) {
+      setState({
+        ...state,
+        diagnosis: {
+          ...diagnosis,
+          notes: [...diagnosis.notes, newNote],
+          currentNote: ''
+        }
+      });
+    } else {
+      setState({
+        ...state,
+        feedback: { error: 'Note cannot be empty' }
+      });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { patient, diagnosis } = state;
 
-    const formErrors = {};
+    if (state.isSubmitting) return;
 
-    if (!diagnosisDate) {
-      formErrors.diagnosisDate = 'Diagnosis Date is required';
-    }
+    setState({ ...state, isSubmitting: true });
 
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
+    // Detailed validation
+    if (!patient?.id) {
+      setState({
+        ...state, 
+        feedback: { error: 'Patient ID is missing' }, 
+        isSubmitting: false 
+      });
       return;
     }
 
+    if (!diagnosis.date) {
+      setState({ 
+        ...state, 
+        feedback: { error: 'Diagnosis date is required' }, 
+        isSubmitting: false 
+      });
+      return;
+    }
+
+    if (diagnosis.notes.length === 0) {
+      setState({ 
+        ...state, 
+        feedback: { error: 'At least one diagnosis note is required' }, 
+        isSubmitting: false 
+      });
+      return;
+    }
+
+    if (!diagnosis.description) {  // Validate that description is not empty
+      setState({
+        ...state,
+        feedback: { error: 'Description is required' },
+        isSubmitting: false
+      });
+      return;
+    }
+
+    const diagnosisPayload = {
+      patient_id: patient.id,
+      doctor_id: patient.doctor_id || null,
+      description: diagnosis.description,
+      created_at: new Date().toISOString(),
+      // appointment_id: patient.appointment_id || null // Ensure this is included
+    };
+
     try {
-      // Here you would typically send the diagnosis data to your backend
-      const diagnosisData = {
-        patientId: id,
-        date: diagnosisDate,
-        notes: notes,
-      };
-      
-      // Example API call (adjust according to your API)
-      // await axios.post(`${BASE_URL}/diagnosis`, diagnosisData);
-      
-      console.log("Diagnosis Saved for patient:", id);
-      console.log("Diagnosis Data:", diagnosisData);
-      setErrors({});
+      await axios.post(`${BASE_URL}/diagnoses`, diagnosisPayload);
+
+      setState({ 
+        ...state, 
+        feedback: { success: 'Diagnosis created successfully!' },
+        isSubmitting: false 
+      });
     } catch (error) {
-      console.error('Error saving diagnosis:', error);
+      setState({ 
+        ...state, 
+        feedback: { 
+          error: error.response?.data?.message || 
+                 error.response?.data?.error || 
+                 'An unexpected error occurred' 
+        },
+        isSubmitting: false 
+      });
     }
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }} color="primary" align="center">
-        New Diagnosis
-      </Typography>
-
-      {/* Patient Information Card */}
-      <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
+    <Container maxWidth="md">
+      <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Selected Patient
-          </Typography>
-          <Typography variant="h6" component="div">
-            {patient?.name}
-          </Typography>
-          
-          <Typography color="textSecondary">
-            Date of Birth: {patient?.date_of_birth}
-          </Typography>
-          <Typography color="textSecondary">
-            Gender: {patient?.gender || 'N/A'}
+          <Typography variant="h5">
+            {state.patient ? `${state.patient.name} - New Diagnosis` : 'Loading...'}
           </Typography>
         </CardContent>
       </Card>
 
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {/* Diagnosis Date Input */}
-            <Grid item xs={12}>
-              <FormControl fullWidth error={Boolean(errors.diagnosisDate)}>
-                <TextField
-                  label="Diagnosis Date"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  required
-                  value={diagnosisDate}
-                  onChange={handleDiagnosisDateChange}
-                />
-                {errors.diagnosisDate && (
-                  <FormHelperText>{errors.diagnosisDate}</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
+      {state.labData && (
+        <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h6">Lab Results:</Typography> <Typography>{state.labData.result || 'No results'}
+           </Typography>
+        </Paper>
+      )}
 
-            {/* Diagnosis Note Input Field with Add Button */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                Diagnosis Notes
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <TextField
-                  label="Enter Diagnosis Note"
-                  variant="outlined"
-                  value={currentNote}
-                  onChange={(e) => setCurrentNote(e.target.value)}
-                  fullWidth
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleAddNote}
-                  sx={{ minWidth: '120px' }}
-                >
-                  Add Note
-                </Button>
-              </Box>
-            </Grid>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <TextField
+              label="Diagnosis Date"a
+              type="date"
+              fullWidth
+              value={state.diagnosis.date}
+              onChange={(e) => setState({ 
+                ...state, 
+                diagnosis: { 
+                  ...state.diagnosis, 
+                  date: e.target.value 
+                } 
+              })}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
 
-            {/* Display Added Notes */}
-            {notes.length > 0 && (
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 2 }}>
-                  Added Diagnosis Notes:
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {notes.map((note, index) => (
-                    <TextField
-                      key={index}
-                      label={`Diagnosis Note ${index + 1}`}
-                      variant="outlined"
-                      value={note}
-                      onChange={(e) => handleNoteEdit(index, e.target.value)}
-                      fullWidth
-                    />
-                  ))}
-                </Box>
-              </Grid>
-            )}
+          <Grid item xs={12}>
+            <TextField
+              label="Description"
+              fullWidth
+              value={state.diagnosis.description}
+              onChange={(e) => setState({ 
+                ...state, 
+                diagnosis: { 
+                  ...state.diagnosis, 
+                  description: e.target.value 
+                } 
+              })}
+              multiline
+              rows={4}
+            />
+          </Grid>
 
-            {/* Submit Button */}
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
+          <Grid item xs={12} container spacing={2}>
+            <Grid item xs={9}>
+              <TextField
+                label="Diagnosis Note"
                 fullWidth
-                size="large"
-                sx={{ mt: 2 }}
+                value={state.diagnosis.currentNote}
+                onChange={(e) => setState({ 
+                  ...state, 
+                  diagnosis: { 
+                    ...state.diagnosis, 
+                    currentNote: e.target.value 
+                  } 
+                })}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                onClick={addNote}
               >
-                Save Diagnosis
+                Add Note
               </Button>
             </Grid>
           </Grid>
-        </form>
-      </Paper>
+
+          {state.diagnosis.notes.map((note, index) => (
+            <Grid item xs={12} key={index}>
+              <TextField
+                value={note}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                }}
+              />
+            </Grid>
+          ))}
+
+          <Grid item xs={12}>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              color="primary" 
+              fullWidth
+              disabled={state.isSubmitting}
+            >
+              Save Diagnosis
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+
+      <Snackbar 
+        open={Boolean(state.feedback.success || state.feedback.error)}
+        autoHideDuration={state.feedback.success ? 6000 : 4000}
+        onClose={() => setState({ ...state, feedback: { success: '', error: '' } })}
+      >
+        <Alert 
+          severity={state.feedback.success ? 'success' : 'error'}
+          onClose={() => setState({ ...state, feedback: { success: '', error: '' } })}
+        >
+          {state.feedback.success || state.feedback.error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

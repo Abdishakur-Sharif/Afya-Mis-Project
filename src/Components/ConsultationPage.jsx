@@ -8,97 +8,170 @@ import {
   Box,
   FormControl,
   FormHelperText,
-  Divider,
-  Card,
-  CardContent,
-  Grid,
-  CircularProgress
+  Select,
+  MenuItem,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemText,
+  DialogActions,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BASE_URL = 'http://127.0.0.1:5555';
 
+// Appointment Selection Modal Component
+const AppointmentModal = ({ open, onClose, appointments, onSelect }) => (
+  <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <DialogTitle>Select an Appointment</DialogTitle>
+    <DialogContent>
+      <List>
+        {appointments.map((appointment) => (
+          <ListItem
+            button
+            key={appointment.id}
+            onClick={() => onSelect(appointment)}
+          >
+            <ListItemText
+              primary={`Appointment ID: ${appointment.id}`}
+              secondary={`Date: ${appointment.appointment_date}`}
+            />
+          </ListItem>
+        ))}
+      </List>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onClose} color="primary">
+        Cancel
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
 const ConsultationPage = () => {
-  const { id } = useParams(); // Get patient ID from URL
+  const { id } = useParams();
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState('');
   const [consultationDate, setConsultationDate] = useState('');
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [doctors, setDoctors] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch patient data when component mounts
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/patients/${id}`);
         setPatient(response.data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching patient data:', error);
+        setAlertMessage('Failed to load patient data.');
+      } finally {
         setLoading(false);
       }
     };
 
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/doctors`);
+        setDoctors(response.data);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      }
+    };
+
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/appointments`, {
+          params: { patient_id: id },
+        });
+        setAppointments(response.data);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
     fetchPatientData();
+    fetchDoctors();
+    fetchAppointments();
   }, [id]);
 
-  const handleInputChange = (e) => {
-    setCurrentNote(e.target.value);
-  };
+  const handleInputChange = (e) => setCurrentNote(e.target.value);
 
   const handleAddNote = () => {
     if (currentNote.trim()) {
-      setNotes([...notes, currentNote]);
+      setNotes((prevNotes) => [...prevNotes, currentNote]);
       setCurrentNote('');
     }
   };
 
-  const handleNoteEdit = (index, value) => {
-    const updatedNotes = [...notes];
-    updatedNotes[index] = value;
-    setNotes(updatedNotes);
-  };
-
-  const handleConsultationDateChange = (e) => {
-    setConsultationDate(e.target.value);
-    if (errors.consultationDate) {
-      setErrors({ ...errors, consultationDate: undefined });
-    }
+  const validateForm = () => {
+    const formErrors = {};
+    if (!consultationDate) formErrors.consultationDate = 'Consultation date is required.';
+    if (!selectedDoctorId) formErrors.selectedDoctor = 'Doctor selection is required.';
+    if (!selectedAppointment) formErrors.selectedAppointment = 'Appointment selection is required.';
+    if (notes.length === 0) formErrors.notes = 'At least one note is required.';
+    return formErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    const formErrors = {};
-
-    if (!consultationDate) {
-      formErrors.consultationDate = 'Consultation Date is required';
-    }
-
+    const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      // Here you would typically send the consultation data to your backend
-      const consultationData = {
-        patientId: id,
-        date: consultationDate,
-        notes: notes,
-      };
-      
-      // Example API call (adjust according to your API)
-      // await axios.post(`${BASE_URL}/consultations`, consultationData);
-      
-      console.log("Consultation Saved for patient:", id);
-      console.log("Consultation Data:", consultationData);
-      setErrors({});
+      const consultationResponse = await axios.post(`${BASE_URL}/consultations`, {
+        patient_id: parseInt(id, 10),
+        doctor_id: selectedDoctorId,
+        consultation_date: consultationDate,
+      });
+
+      const consultationId = consultationResponse.data.id;
+      const notePromises = notes.map((note) =>
+        axios.post(`${BASE_URL}/consultation_notes`, {
+          notes: note,
+          patient_id: parseInt(id, 10),
+          consultation_id: consultationId,
+          created_at: new Date().toISOString(),
+          // appointment_id: selectedAppointment.id,
+        })
+      );
+      await Promise.all(notePromises);
+
+      setAlertMessage('Consultation saved successfully!');
+      setConsultationDate('');
+      setNotes([]);
+      setSelectedDoctorId('');
+      setSelectedAppointment(null);
     } catch (error) {
       console.error('Error saving consultation:', error);
+      setAlertMessage('Error saving consultation.');
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleSelectAppointment = (appointment) => {
+    setSelectedAppointment(appointment);
+    setModalOpen(false);
   };
 
   if (loading) {
@@ -111,108 +184,73 @@ const ConsultationPage = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }} color="primary" align="center">
+      <Typography variant="h4" align="center" gutterBottom>
         New Consultation
       </Typography>
-
-      {/* Patient Information Card */}
-      <Card sx={{ mb: 3, bgcolor: 'grey.50' }}>
-        <CardContent>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Selected Patient
-          </Typography>
-          <Typography variant="h6" component="div">
-            {patient?.name}
-          </Typography>
-          
-          <Typography color="textSecondary">
-            Date of Birth: {patient?.date_of_birth}
-          </Typography>
-          <Typography color="textSecondary">
-            Gender: {patient?.gender || 'N/A'}
-          </Typography>
-        </CardContent>
-      </Card>
-
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {/* Consultation Date Input */}
-            <Grid item xs={12}>
-              <FormControl fullWidth error={Boolean(errors.consultationDate)}>
-                <TextField
-                  label="Consultation Date"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  variant="outlined"
-                  required
-                  value={consultationDate}
-                  onChange={handleConsultationDateChange}
-                />
-                {errors.consultationDate && (
-                  <FormHelperText>{errors.consultationDate}</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
-
-            {/* Note Input Field with Add Button */}
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <TextField
-                  label="Enter Note"
-                  variant="outlined"
-                  value={currentNote}
-                  onChange={handleInputChange}
-                  fullWidth
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleAddNote}
-                  sx={{ minWidth: '120px' }}
-                >
-                  Add Note
-                </Button>
-              </Box>
-            </Grid>
-
-            {/* Display Added Notes */}
-            {notes.length > 0 && (
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 2 }}>
-                  Consultation Notes:
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {notes.map((note, index) => (
-                    <TextField
-                      key={index}
-                      label={`Note ${index + 1}`}
-                      variant="outlined"
-                      value={note}
-                      onChange={(e) => handleNoteEdit(index, e.target.value)}
-                      fullWidth
-                    />
-                  ))}
-                </Box>
-              </Grid>
-            )}
-
-            {/* Submit Button */}
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                fullWidth
-                size="large"
-                sx={{ mt: 2 }}
-              >
-                Save Consultation
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
+      {alertMessage && <Alert severity="info">{alertMessage}</Alert>}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="subtitle2">Patient Details:</Typography>
+        <Typography>Name: {patient?.name}</Typography>
+        <Typography>Date of Birth: {patient?.date_of_birth}</Typography>
+        <Typography>Gender: {patient?.gender}</Typography>
       </Paper>
+      <form onSubmit={handleSubmit}>
+        <FormControl fullWidth sx={{ mb: 3 }} error={!!errors.selectedDoctor}>
+          <InputLabel id="doctor-select-label">Select Doctor</InputLabel>
+          <Select
+            labelId="doctor-select-label"
+            value={selectedDoctorId}
+            onChange={(e) => setSelectedDoctorId(e.target.value)}
+          >
+            {doctors.map((doctor) => (
+              <MenuItem key={doctor.id} value={doctor.id}>
+                {doctor.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>{errors.selectedDoctor}</FormHelperText>
+        </FormControl>
+        <Button onClick={() => setModalOpen(true)} sx={{ mb: 3 }}>
+          Select Appointment
+        </Button>
+        <FormHelperText error>{errors.selectedAppointment}</FormHelperText>
+        <TextField
+          label="Consultation Date"
+          type="datetime-local"
+          value={consultationDate}
+          onChange={(e) => setConsultationDate(e.target.value)}
+          fullWidth
+          sx={{ mb: 3 }}
+          error={!!errors.consultationDate}
+          helperText={errors.consultationDate}
+        />
+        <TextField
+          label="Add Notes"
+          value={currentNote}
+          onChange={handleInputChange}
+          fullWidth
+          multiline
+          rows={4}
+          sx={{ mb: 3 }}
+        />
+        <Button onClick={handleAddNote} variant="contained" sx={{ mb: 3 }}>
+          Add Note
+        </Button>
+        <ul>
+          {notes.map((note, idx) => (
+            <li key={idx}>{note}</li>
+          ))}
+        </ul>
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? <CircularProgress size={24} /> : 'Save Consultation'}
+        </Button>
+      </form>
+      <AppointmentModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        appointments={appointments}
+        onSelect={handleSelectAppointment}
+      />
     </Container>
   );
 };

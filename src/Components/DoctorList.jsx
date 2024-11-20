@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const DoctorList = () => {
   const [doctorList, setDoctorList] = useState([]);
 
-  useEffect(() => {
-    const storedDoctors = localStorage.getItem('doctors');
-    if (storedDoctors) {
-      setDoctorList(JSON.parse(storedDoctors));
+  // Function to fetch doctors from the backend
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5555/doctors'); // Adjust the URL as necessary
+      setDoctorList(response.data); // Set the state with the fetched data
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
     }
+  };
+
+  useEffect(() => {
+    fetchDoctors(); // Fetch doctors when the component mounts
   }, []);
 
   // Remove doctor function
-  const removeDoctor = (id) => {
-    const updatedDoctors = doctorList.filter((doctor) => doctor.id !== id);
-    setDoctorList(updatedDoctors);
-    localStorage.setItem('doctors', JSON.stringify(updatedDoctors));
+  const removeDoctor = async (id) => {
+    try {
+      await axios.delete(`http://127.0.0.1:5555/doctors/${id}`); // Adjust the URL as necessary
+      setDoctorList(doctorList.filter((doctor) => doctor.id !== id)); // Update state to remove the doctor locally
+    } catch (error) {
+      console.error('Error removing doctor:', error);
+    }
   };
 
   return (
@@ -26,7 +37,7 @@ const DoctorList = () => {
       <Link to="/admindashboard" className="mb-6 inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
         Admin Dashboard
       </Link>
-      <br></br>
+      <br />
       {/* Button to Navigate to Add Doctor Form */}
       <Link to="/adddoctors" className="mb-6 inline-block bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
         Add New Doctor
@@ -49,8 +60,8 @@ const DoctorList = () => {
               doctorList.map((doctor) => (
                 <tr key={doctor.id} className="border-b last:border-none hover:bg-blue-100">
                   <td className="py-3 px-4 border-r border-gray-300 text-blue-700">{doctor.name}</td>
-                  <td className="py-3 px-4 border-r border-gray-300">{doctor.specialization}</td>
-                  <td className="py-3 px-4 border-r border-gray-300">{doctor.contact}</td>
+                  <td className="py-3 px-4 border-r border-gray-300">{doctor.speciality}</td>
+                  <td className="py-3 px-4 border-r border-gray-300">{doctor.phone_number}</td>
                   <td className="py-3 px-4 border-r border-gray-300">{doctor.email}</td>
                   <td className="py-3 px-4">
                     <button
