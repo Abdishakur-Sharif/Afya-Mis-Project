@@ -5,7 +5,7 @@ import {
   IconCalendarEvent,
   IconUsers,
   IconStethoscope,
-  IconFileText,
+  IconBell,
   IconLogout,
   IconHospitalCircle
 } from '@tabler/icons-react';
@@ -53,16 +53,16 @@ function Sidebar() {
         </li>
         <li>
           <a
-            href="/report"
+            href="/doctorsalerts"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
-            <IconFileText size={20} className="mr-3" />
-            Medical Reports
+            <IconBell size={20} className="mr-3" />
+            View lab results
           </a>
         </li>
         <li>
           <a
-            href="/lab-dashboard"
+            href="/addlabrequests"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
           >
             <IconHospitalCircle size={20} className="mr-3" />

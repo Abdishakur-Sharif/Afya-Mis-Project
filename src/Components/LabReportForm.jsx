@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import {
-  IconHospitalCircle
-} from '@tabler/icons-react';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { IconHospitalCircle } from "@tabler/icons-react";
+import TestAlertButton from "./TestAlertButton";
+import socket from "./context/Socket.jsx";
 
 const Notification = ({ message, type }) => {
   if (!message) return null;
 
-  const bgColor = type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+  const bgColor =
+    type === "success"
+      ? "bg-green-100 text-green-700"
+      : "bg-red-100 text-red-700";
 
   return (
     <div className={`p-4 mb-6 rounded-md text-center ${bgColor}`}>
@@ -16,16 +20,20 @@ const Notification = ({ message, type }) => {
 };
 
 const LabReportForm = () => {
-  const [patientName, setPatientName] = useState('');
-  const [doctorName, setDoctorName] = useState('');
-  const [testType, setTestType] = useState('');
-  const [remarks, setRemarks] = useState('');
-  const [findings, setFindings] = useState([{ parameter: '', result: '' }]);
+  const location = useLocation();
+  const { patientName, doctorName, testType, labTech, testId } =
+    location.state || {};
+  const [remarks, setRemarks] = useState("");
+  const [findings, setFindings] = useState([{ parameter: "", result: "" }]);
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState({ visible: false, type: '', message: '' });
+  const [notification, setNotification] = useState({
+    visible: false,
+    type: "",
+    message: "",
+  });
 
   const handleAddFinding = () => {
-    setFindings([...findings, { parameter: '', result: '' }]);
+    setFindings([...findings, { parameter: "", result: "" }]);
   };
 
   const handleRemoveFinding = (index) => {
@@ -39,105 +47,148 @@ const LabReportForm = () => {
   };
 
   const resetForm = () => {
-    setPatientName('');
-    setDoctorName('');
-    setTestType('');
-    setRemarks('');
-    setFindings([{ parameter: '', result: '' }]);
+    setRemarks("");
+    setFindings([{ parameter: "", result: "" }]);
   };
 
-  const handleSubmit = (e) => {
+  
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate findings
+    for (const finding of findings) {
+        if (!finding.parameter || !finding.result) {
+            setNotification({
+                visible: true,
+                type: "error",
+                message: "Please fill in both parameter and result for each finding.",
+            });
+            setLoading(false);
+            return;
+        }
+    }
+
     const reportData = {
-      patientName,
-      doctorName,
-      testType,
-      remarks,
-      findings,
+        patient_name: patientName,
+        doctor_name: doctorName,
+        test_type: testType,
+        findings: findings,
+        remark: remarks,
+        labTech, // Include lab tech details
     };
 
-    console.log('Submitting form with data:', reportData);
+    try {
+        const response = await fetch("http://127.0.0.1:5555/test_reports", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+        });
 
-    setTimeout(() => {
-      setNotification({
-        visible: true,
-        type: 'success',
-        message: `The lab result for ${patientName} is ready! You can now check the result.`,
-      });
+        const result = await response.json();
 
-      resetForm();
-      setLoading(false);
-    }, 1000);
-  };
+        if (result.error) {
+            setNotification({
+                visible: true,
+                type: "error",
+                message: `Error: ${result.error}`,
+            });
+        } else {
+            setNotification({
+                visible: true,
+                type: "success",
+                message: `The lab result for ${patientName} is ready!`,
+            });
+
+            // Emit a WebSocket event for real-time update
+            socket.emit("lab_report_completed", {
+                message: `Lab report for ${patientName} has been submitted.`,
+                testDetails: {
+                    testTypeName: testType,
+                    patientName: patientName,
+                    labTechName: labTech,
+                    completedAt: new Date().toISOString(),
+                },
+            });
+        }
+    } catch (error) {
+        setNotification({
+            visible: true,
+            type: "error",
+            message: `Error: ${error.message}`,
+        });
+    } finally {
+        resetForm();
+        setLoading(false);
+    }
+};
+
 
   return (
-    <div className='flex flex-col md:flex-row gap-6'>
+    <div className="flex flex-col md:flex-row gap-6">
       <div className="w-full md:w-3/4 mx-auto bg-white shadow-md rounded-lg p-4 md:p-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-4 md:mb-6">Lab Report Form</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-4 md:mb-6">
+          Lab Report Form
+        </h2>
         <a
-              href="/lab-dashboard"
-              className="mb-5 flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
-            >
-              <IconHospitalCircle size={20} className="mr-3" />
-              Lab Requests
-            </a>
-      
+          href="/lab-dashboard"
+          className="mb-5 flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
+        >
+          <IconHospitalCircle size={20} className="mr-3" />
+          Lab Requests
+        </a>
+
         <Notification message={notification.message} type={notification.type} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <h3 className="text-xl font-semibold text-gray-700 mb-4">
+            Test Details:
+          </h3>
+
           <div>
-            <label className="block text-gray-600 font-medium mb-2">Patient Name</label>
-            <input
-              type="text"
-              value={patientName}
-              onChange={(e) => setPatientName(e.target.value)}
-              required
-              placeholder="Enter Patient Name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
+            <p className="text-gray-600 font-medium">
+              Patient Name: <span className="font-semibold">{patientName}</span>
+            </p>
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">Doctor Name</label>
-            <input
-              type="text"
-              value={doctorName}
-              onChange={(e) => setDoctorName(e.target.value)}
-              required
-              placeholder="Enter Doctor Name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
+            <p className="text-gray-600 font-medium">
+              Doctor Name: <span className="font-semibold">{doctorName}</span>
+            </p>
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">Test Type</label>
-            <select
-              value={testType}
-              onChange={(e) => setTestType(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="" disabled>
-                Select Test Type
-              </option>
-              <option value="blood">Blood Test</option>
-              <option value="urine">Urine Test</option>
-              <option value="xray">X-ray</option>
-            </select>
+            <p className="text-gray-600 font-medium">
+              Test Type: <span className="font-semibold">{testType}</span>
+            </p>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Test Findings</h3>
+            <p className="text-gray-600 font-medium">
+              Lab Tech: <span className="font-semibold">{labTech}</span>
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              Test Findings
+            </h3>
             {findings.map((finding, index) => (
-              <div key={index} className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 mb-2">
+              <div
+                key={index}
+                className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 mb-2"
+              >
                 <input
                   type="text"
                   name="parameter"
                   placeholder="Parameter"
                   value={finding.parameter}
-                  onChange={(e) => handleFindingChange(index, 'parameter', e.target.value)}
+                  onChange={(e) =>
+                    handleFindingChange(index, "parameter", e.target.value)
+                  }
                   required
                   className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md"
                 />
@@ -146,7 +197,9 @@ const LabReportForm = () => {
                   name="result"
                   placeholder="Result"
                   value={finding.result}
-                  onChange={(e) => handleFindingChange(index, 'result', e.target.value)}
+                  onChange={(e) =>
+                    handleFindingChange(index, "result", e.target.value)
+                  }
                   required
                   className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md"
                 />
@@ -169,7 +222,9 @@ const LabReportForm = () => {
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">Remarks</label>
+            <label className="block text-gray-600 font-medium mb-2">
+              Remarks
+            </label>
             <textarea
               placeholder="Enter Remarks"
               value={remarks}
@@ -178,14 +233,18 @@ const LabReportForm = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-
+          <div>
+            <TestAlertButton />
+            </div>  
           <div className="text-right">
             <button
               type="submit"
               disabled={loading}
-              className={`w-full md:w-auto px-4 py-2 font-medium rounded-md text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+              className={`w-full md:w-auto px-4 py-2 font-medium rounded-md text-white ${
+                loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              {loading ? 'Submitting...' : 'Submit Report'}
+              {loading ? "Submitting..." : "Submit Report & Alert"}
             </button>
           </div>
         </form>

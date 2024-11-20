@@ -2,7 +2,7 @@ import React from "react";
 
 const TestAlertButton = () => {
     const sendTestAlert = async () => {
-        const response = await fetch("http://localhost:5555/send_test_alert", {
+        const response = await fetch("http://localhost:5555/test_reports", {
             method: "POST",
         });
 
