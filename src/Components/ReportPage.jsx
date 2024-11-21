@@ -10,12 +10,14 @@ import {
   Divider,
   Box,
   Chip,
+  Button,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AccessTime, Assignment, Science } from '@mui/icons-material';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:5555'; // Replace with your actual backend URL
+const BASE_URL = 'http://127.0.0.1:5555'; // Update if the base URL differs
 
 const theme = createTheme({
   palette: {
@@ -31,41 +33,43 @@ const theme = createTheme({
   },
 });
 
-const ReportPage = ({ patientId }) => {
-  const [patientData, setPatientData] = useState(null);
+const ReportPage = () => {
+  const { patientId } = useParams(); // Extract patientId from URL
   const [consultations, setConsultations] = useState([]);
   const [diagnoses, setDiagnoses] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Function to fetch data for consultations, diagnoses, and lab reports specific to the patient
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null); // Reset error state before new fetch
+    try {
+      const [consultationsResponse, diagnosesResponse, labResultsResponse] = await Promise.all([
+        axios.get(`${BASE_URL}/consultations`, { params: { patient_id: patientId } }), // Fetch consultations for the patient
+        axios.get(`${BASE_URL}/diagnoses`, { params: { patient_id: patientId } }), // Fetch diagnoses for the patient
+        axios.get(`${BASE_URL}/test_reports`, { params: { patient_id: patientId } }), // Fetch lab results for the patient
+      ]);
+      setConsultations(consultationsResponse.data);
+      setDiagnoses(diagnosesResponse.data);
+      setLabResults(labResultsResponse.data);
+    } catch (err) {
+      setError('Error fetching patient report data. Please verify the API endpoints.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch data when the component mounts or when patientId changes
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const patientResponse = await axios.get(`${BASE_URL}/patients/${patientId}`);
-        const consultationsResponse = await axios.get(`${BASE_URL}/consultations/${patientId}`);
-        const diagnosesResponse = await axios.get(`${BASE_URL}/diagnoses/${patientId}`);
-        const labResultsResponse = await axios.get(`${BASE_URL}/test_reports/${patientId}`);
-
-        setPatientData(patientResponse.data);
-        setConsultations(consultationsResponse.data);
-        setDiagnoses(diagnosesResponse.data);
-        setLabResults(labResultsResponse.data);
-      } catch (err) {
-        setError("Error fetching patient report data");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [patientId]);
 
   if (loading) {
     return (
-      <Container className="py-8 flex justify-center items-center h-screen">
+      <Container sx={{ py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress size={60} thickness={4} />
       </Container>
     );
@@ -73,115 +77,128 @@ const ReportPage = ({ patientId }) => {
 
   if (error) {
     return (
-      <Container className="py-8">
-        <Typography variant="h6" color="error" className="text-center">{error}</Typography>
+      <Container sx={{ py: 8, textAlign: 'center' }}>
+        <Typography variant="h6" color="error">{error}</Typography>
+        <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={fetchData}>
+          Retry
+        </Button>
       </Container>
     );
   }
 
-  if (!patientData) {
-    return null;
-  }
-
-  const { name, gender, phone_number, email, date_of_birth } = patientData;
-  const age = new Date().getFullYear() - new Date(date_of_birth).getFullYear();
-
   return (
     <ThemeProvider theme={theme}>
-      <Box className="min-h-screen bg-gray-100">
-        <Container className="py-8">
-          <Typography variant="h4" className="text-center mb-6 text-primary font-bold">Patient Report</Typography>
-          <Paper elevation={3} className="p-6 bg-white rounded-lg shadow-lg">
-            <Box className="bg-blue-50 p-4 rounded-lg mb-6">
-              <Typography variant="h6" className="mb-4 text-blue-800">Patient Summary</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body1" className="mb-2"><strong>Name:</strong> {name}</Typography>
-                  <Typography variant="body1" className="mb-2"><strong>Age:</strong> {age}</Typography>
-                  <Typography variant="body1" className="mb-2"><strong>Gender:</strong> {gender}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body1" className="mb-2"><strong>Phone:</strong> {phone_number}</Typography>
-                  <Typography variant="body1" className="mb-2"><strong>Email:</strong> {email}</Typography>
-                  <Typography variant="body1" className="mb-2"><strong>DOB:</strong> {date_of_birth}</Typography>
-                </Grid>
-              </Grid>
-            </Box>
-
-            <Divider className="my-6" />
-
-            <Box className="mb-6">
-              <Typography variant="h6" className="mb-4 text-primary flex items-center">
-                <AccessTime className="mr-2" /> Consultation Notes
-              </Typography>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+        <Container sx={{ py: 8 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              textAlign: 'center',
+              mb: 6,
+              color: 'primary.main',
+              fontWeight: 'bold',
+            }}
+          >
+            Patient Report
+          </Typography>
+          <Paper elevation={3} sx={{ p: 4, backgroundColor: 'white', borderRadius: 2, boxShadow: 3 }}>
+            {/* Consultations */}
+            <Section title="Consultation Notes" icon={<AccessTime />}>
               {consultations.length > 0 ? (
                 consultations.map((note, index) => (
-                  <Card key={index} className="mb-2 bg-green-50">
+                  <Card key={index} sx={{ mb: 2, backgroundColor: 'green.50' }}>
                     <CardContent>
-                      <Typography variant="body2" className="text-green-800">
-                        <strong>{note.consultation_date}:</strong> {note.details}
+                      <Typography variant="body2" sx={{ color: 'green.800' }}>
+                        <strong>{note.consultation_date}:</strong> {note.notes}
                       </Typography>
                     </CardContent>
                   </Card>
                 ))
               ) : (
-                <Typography variant="body2" className="text-gray-600">No consultation notes available.</Typography>
+                <Typography variant="body2" sx={{ color: 'gray.600' }}>
+                  No consultation notes available.
+                </Typography>
               )}
-            </Box>
+            </Section>
 
-            <Divider className="my-6" />
+            <Divider sx={{ my: 6 }} />
 
-            <Box className="mb-6">
-              <Typography variant="h6" className="mb-4 text-primary flex items-center">
-                <Assignment className="mr-2" /> Diagnosis Notes
-              </Typography>
+            {/* Diagnoses */}
+            <Section title="Diagnosis Notes" icon={<Assignment />}>
               {diagnoses.length > 0 ? (
                 diagnoses.map((note, index) => (
-                  <Card key={index} className="mb-2 bg-yellow-50">
+                  <Card key={index} sx={{ mb: 2, backgroundColor: 'yellow.50' }}>
                     <CardContent>
-                      <Typography variant="body2" className="text-yellow-800">
+                      <Typography variant="body2" sx={{ color: 'yellow.800' }}>
                         <strong>{note.created_at}:</strong> {note.diagnosis_description}
                       </Typography>
                     </CardContent>
                   </Card>
                 ))
               ) : (
-                <Typography variant="body2" className="text-gray-600">No diagnosis notes available.</Typography>
+                <Typography variant="body2" sx={{ color: 'gray.600' }}>
+                  No diagnosis notes available.
+                </Typography>
               )}
-            </Box>
+            </Section>
 
-            <Divider className="my-6" />
+            <Divider sx={{ my: 6 }} />
 
-            <Box>
-              <Typography variant="h6" className="mb-4 text-primary flex items-center">
-                <Science className="mr-2" /> Lab Results
-              </Typography>
+            {/* Lab Results */}
+            <Section title="Lab Results" icon={<Science />}>
               {labResults.length > 0 ? (
                 <Grid container spacing={2}>
                   {labResults.map((result, index) => (
                     <Grid item xs={12} sm={6} md={4} key={index}>
-                      <Card className="h-full bg-purple-50">
+                      <Card sx={{ backgroundColor: 'purple.50' }}>
                         <CardContent>
-                          <Typography variant="body2" className="mb-2 text-purple-800"><strong>Test:</strong> {result.test_name}</Typography>
-                          <Typography variant="body2" className="mb-2 text-purple-800">
-                            <strong>Status:</strong> <Chip label={result.status} color="primary" size="small" />
+                          <Typography variant="body2" sx={{ color: 'purple.800', mb: 1 }}>
+                            <strong>Test:</strong> {result.test_name}
                           </Typography>
-                          <Typography variant="body2" className="mb-2 text-purple-800"><strong>Results:</strong> {result.test_results}</Typography>
-                          <Typography variant="body2" className="text-purple-800"><strong>Date:</strong> {result.created_at}</Typography>
+                          <Typography variant="body2" sx={{ color: 'purple.800', mb: 1 }}>
+                            <strong>Status:</strong>{' '}
+                            <Chip label={result.status} color="primary" size="small" />
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'purple.800', mb: 1 }}>
+                            <strong>Results:</strong> {result.test_results}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'purple.800' }}>
+                            <strong>Date:</strong> {result.created_at}
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Grid>
                   ))}
                 </Grid>
               ) : (
-                <Typography variant="body2" className="text-gray-600">No lab results available.</Typography>
+                <Typography variant="body2" sx={{ color: 'gray.600' }}>
+                  No lab results available.
+                </Typography>
               )}
-            </Box>
+            </Section>
           </Paper>
         </Container>
       </Box>
     </ThemeProvider>
   );
 };
+
+// Section component for rendering each section
+const Section = ({ title, icon, children }) => (
+  <Box sx={{ mb: 6 }}>
+    <Typography
+      variant="h6"
+      sx={{
+        mb: 2,
+        color: 'primary.main',
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      {icon && React.cloneElement(icon, { sx: { mr: 1 } })} {title}
+    </Typography>
+    {children}
+  </Box>
+);
 
 export default ReportPage;
