@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Fetch endpoint
-const API_URL = "http://127.0.0.1:5555/tests";
+const API_URL = "https://afya-mis-backend-6.onrender.com/tests";
 
 function TestRequestsPage() {
   const navigate = useNavigate();

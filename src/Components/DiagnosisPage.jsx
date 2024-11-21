@@ -6,7 +6,7 @@ import {
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = "http://127.0.0.1:5555";
+const BASE_URL = "https://afya-mis-backend-6.onrender.com";
 
 const DiagnosisPage = () => {
   const { id } = useParams(); // Patient ID

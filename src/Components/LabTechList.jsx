@@ -10,7 +10,9 @@ const LabTechList = () => {
   useEffect(() => {
     const fetchLabTechs = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5555/lab_techs");
+        const response = await axios.get(
+          "https://afya-mis-backend-6.onrender.com/lab_techs"
+        );
         setLabTechList(response.data); // Assuming the API returns an array of lab techs
       } catch (err) {
         setError("Failed to fetch lab technicians.");
@@ -23,17 +25,19 @@ const LabTechList = () => {
   }, []);
 
   // Remove labtech function
-  const removeLabtech = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this LabTech?");
-    if (!confirmDelete) return;
+  // const removeLabtech = async (id) => {
+  //   const confirmDelete = window.confirm("Are you sure you want to delete this LabTech?");
+  //   if (!confirmDelete) return;
 
-    try {
-      await axios.delete(`http://127.0.0.1:5555/lab_techs/${id}`); // Call the API to delete
-      setLabTechList(labtechList.filter((labtech) => labtech.id !== id)); // Update local state
-    } catch (err) {
-      setError("Failed to delete lab technician.");
-    }
-  };
+  //   try {
+  //     await axios.delete(
+  //       `https://afya-mis-backend-6.onrender.com/lab_techs/${id}`
+  //     ); // Call the API to delete
+  //     setLabTechList(labtechList.filter((labtech) => labtech.id !== id)); // Update local state
+  //   } catch (err) {
+  //     setError("Failed to delete lab technician.");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">

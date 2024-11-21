@@ -25,7 +25,10 @@ const AddDoctorForm = () => {
 
     try {
       // Send POST request to the backend using Axios
-      const response = await axios.post('http://127.0.0.1:5555/doctors', newDoctor);
+      const response = await axios.post(
+        "https://afya-mis-backend-6.onrender.com/doctors",
+        newDoctor
+      );
 
       if (response.status !== 201) {
         throw new Error('Failed to add doctor');

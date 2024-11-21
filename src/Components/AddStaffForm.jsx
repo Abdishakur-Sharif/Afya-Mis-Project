@@ -24,7 +24,10 @@ const AddStaffForm = () => {
     };
 
     try {
-      await axios.post('http://127.0.0.1:5555/staffs', newStaff); // Send data to API
+      await axios.post(
+        "https://afya-mis-backend-6.onrender.com/staffs",
+        newStaff
+      ); // Send data to API
       navigate('/staffs'); // Navigate to staff list after adding
     } catch (err) {
       setError('Failed to add staff member. Please try again.'); // Set error message

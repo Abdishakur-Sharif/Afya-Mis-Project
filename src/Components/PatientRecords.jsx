@@ -13,8 +13,8 @@ function PatientRecords() {
   const fetchPatients = async () => {
     try {
       const [patientsResponse, paymentsResponse] = await Promise.all([
-        fetch("http://127.0.0.1:5555/patients"),
-        fetch("http://127.0.0.1:5555/payments"),
+        fetch("https://afya-mis-backend-6.onrender.com/patients"),
+        fetch("https://afya-mis-backend-6.onrender.com/payments"),
       ]);
 
       if (patientsResponse.ok && paymentsResponse.ok) {

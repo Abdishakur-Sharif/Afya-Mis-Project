@@ -10,7 +10,9 @@ const StaffList = () => {
   useEffect(() => {
     const fetchStaffs = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5555/staffs'); // Fetch from API
+        const response = await axios.get(
+          "https://afya-mis-backend-6.onrender.com/staffs"
+        ); // Fetch from API
         setStaffList(response.data);
       } catch (err) {
         setError("Failed to fetch staff members.");
@@ -23,17 +25,17 @@ const StaffList = () => {
   }, []);
 
   // Remove staff function
-  const removeStaff = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this staff member?");
-    if (!confirmDelete) return;
+  // const removeStaff = async (id) => {
+  //   const confirmDelete = window.confirm("Are you sure you want to delete this staff member?");
+  //   if (!confirmDelete) return;
 
-    try {
-      await axios.delete(`http://127.0.0.1:5555/staffs/${id}`); // Call the API to delete
-      setStaffList(staffList.filter((staff) => staff.id !== id)); // Update local state
-    } catch (err) {
-      setError("Failed to delete staff member.");
-    }
-  };
+  //   try {
+  //     await axios.delete(`http://127.0.0.1:5555/staffs/${id}`); // Call the API to delete
+  //     setStaffList(staffList.filter((staff) => staff.id !== id)); // Update local state
+  //   } catch (err) {
+  //     setError("Failed to delete staff member.");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">

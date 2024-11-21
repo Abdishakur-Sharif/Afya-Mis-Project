@@ -52,13 +52,16 @@ function PatientRegistrationForm() {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:5555/patients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(patientData),
-      });
+      const response = await fetch(
+        "https://afya-mis-backend-6.onrender.com/patients",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(patientData),
+        }
+      );
 
       const result = await response.json();
 

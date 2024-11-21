@@ -22,7 +22,10 @@ const AddLabTechForm = () => {
 
     try {
       // Send POST request to the backend
-      const response = await axios.post("http://127.0.0.1:5555/lab_techs", newLabTech);
+      const response = await axios.post(
+        "https://afya-mis-backend-6.onrender.com/lab_techs",
+        newLabTech
+      );
 
       // Reset form fields
       setLabTechName("");

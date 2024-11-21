@@ -21,7 +21,9 @@ function Doctordashboard() {
     const fetchData = async () => {
       try {
         // Fetch patients and filter by ID > 20
-        const patientsRes = await fetch("http://127.0.0.1:5555/patients");
+        const patientsRes = await fetch(
+          "https://afya-mis-backend-6.onrender.com/patients"
+        );
         const patientsData = await patientsRes.json();
         const filteredPatients = patientsData.filter(
           (patient) => patient.id > 20
@@ -29,18 +31,18 @@ function Doctordashboard() {
         setPatients(filteredPatients);
 
         // Fetch doctors
-        const doctorsRes = await fetch("http://127.0.0.1:5555/doctors");
+        const doctorsRes = await fetch("https://afya-mis-backend-6.onrender.com/doctors");
         const doctorsData = await doctorsRes.json();
         setDoctors(doctorsData);
 
         // Fetch lab requests
-        const testsRes = await fetch("http://127.0.0.1:5555/tests");
+        const testsRes = await fetch("https://afya-mis-backend-6.onrender.com/tests");
         const testsData = await testsRes.json();
         setLabRequests(testsData);
 
         // Fetch appointments
         const appointmentsRes = await fetch(
-          "http://127.0.0.1:5555/appointments"
+          "https://afya-mis-backend-6.onrender.com/appointments"
         );
         const appointmentsData = await appointmentsRes.json();
         setAppointments(appointmentsData);

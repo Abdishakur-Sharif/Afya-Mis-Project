@@ -33,7 +33,9 @@ function AppointmentScheduler() {
     // Fetch doctors from the API to populate the dropdown
     const fetchDoctors = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/doctors');
+        const response = await fetch(
+          "https://afya-mis-backend-6.onrender.com/doctors"
+        );
         const data = await response.json();
         setDoctors(data);
       } catch (error) {
@@ -44,7 +46,9 @@ function AppointmentScheduler() {
     // Fetch patients from an API (replace with actual endpoint)
     const fetchPatients = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/patients');
+        const response = await fetch(
+          "https://afya-mis-backend-6.onrender.com/patients"
+        );
         const data = await response.json();
         setPatients(data);
       } catch (error) {
@@ -84,13 +88,16 @@ function AppointmentScheduler() {
 
     // Send POST request to create the appointment
     try {
-      const response = await fetch('http://127.0.0.1:5555/appointments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newAppointment),
-      });
+      const response = await fetch(
+        "https://afya-mis-backend-6.onrender.com/appointments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newAppointment),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to schedule appointment');

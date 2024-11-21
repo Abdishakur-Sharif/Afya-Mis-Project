@@ -19,11 +19,17 @@ const AddTestRequest = () => {
     // Fetch data for dropdowns
     const fetchData = async () => {
       try {
-        const patientResponse = await fetch("http://127.0.0.1:5555/patients");
-        const doctorResponse = await fetch("http://127.0.0.1:5555/doctors");
-        const labTechResponse = await fetch("http://127.0.0.1:5555/lab_techs");
+        const patientResponse = await fetch(
+          "https://afya-mis-backend-6.onrender.com/patients"
+        );
+        const doctorResponse = await fetch(
+          "https://afya-mis-backend-6.onrender.com/doctors"
+        );
+        const labTechResponse = await fetch(
+          "https://afya-mis-backend-6.onrender.com/lab_techs"
+        );
         const testTypeResponse = await fetch(
-          "http://127.0.0.1:5555/test-types"
+          "https://afya-mis-backend-6.onrender.com/test-types"
         );
 
         if (patientResponse.ok) {
@@ -72,13 +78,16 @@ const AddTestRequest = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:5555/tests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://afya-mis-backend-6.onrender.com/tests",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();

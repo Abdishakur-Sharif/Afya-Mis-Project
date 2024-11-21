@@ -77,13 +77,16 @@ const LabReportForm = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:5555/test_reports", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reportData),
-      });
+      const response = await fetch(
+        "https://afya-mis-backend-6.onrender.com/test_reports",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reportData),
+        }
+      );
 
       const result = await response.json();
 

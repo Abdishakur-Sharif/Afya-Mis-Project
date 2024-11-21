@@ -17,7 +17,7 @@ function Payment() {
   const fetchPatientDetails = async () => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5555/patients/${patientId}`
+        `https://afya-mis-backend-6.onrender.com/patients/${patientId}`
       );
       const data = await response.json();
       if (response.ok) {
@@ -41,7 +41,7 @@ function Payment() {
 
     try {
       setIsSubmitting(true); // Set submitting to true while the payment is being processed
-      const response = await fetch("http://127.0.0.1:5555/payments", {
+      const response = await fetch("https://afya-mis-backend-6.onrender.com/payments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

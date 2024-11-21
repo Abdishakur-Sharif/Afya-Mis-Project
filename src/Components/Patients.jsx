@@ -8,7 +8,7 @@ import { Search as SearchIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon, R
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const BASE_URL = 'http://127.0.0.1:5555';
+const BASE_URL = "https://afya-mis-backend-6.onrender.com";
 const POLLING_INTERVAL = 30000; // Poll every 30 seconds
 
 function PatientsPage() {
@@ -85,10 +85,10 @@ function PatientsPage() {
     handleCloseMenu();
   };
 
-  const handleRedirectToReports = () => {
-    navigate(`/patient/${selectedPatient.id}/reports`);
-    handleCloseMenu();
-  };
+  // const handleRedirectToReports = () => {
+  //   navigate(`/patient/${selectedPatient.id}/reports`);
+  //   handleCloseMenu();
+  // };
 
   const filteredPatients = patientsData.filter((patient) =>
     patient.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -192,7 +192,7 @@ function PatientsPage() {
       >
         <MenuItem onClick={handleRedirectToConsultations}>Consultation</MenuItem>
         <MenuItem onClick={handleRedirectToDiagnosis}>Diagnosis</MenuItem>
-        <MenuItem onClick={handleRedirectToReports}>Report</MenuItem>
+        {/* <MenuItem onClick={handleRedirectToReports}>Report</MenuItem> */}
         <MenuItem onClick={() => handleDeletePatient(selectedPatient?.id)}>
           <DeleteIcon sx={{ mr: 1 }} /> Delete
         </MenuItem>

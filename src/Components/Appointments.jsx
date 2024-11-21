@@ -47,7 +47,9 @@ function Appointments() {
     // Fetch appointments from the Flask API
     const fetchAppointments = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/appointments');
+        const response = await fetch(
+          "https://afya-mis-backend-6.onrender.com/appointments"
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch appointments');
         }
@@ -75,9 +77,12 @@ function Appointments() {
       const appointmentToDelete = appointments[index];
       
       try {
-        const response = await fetch(`http://127.0.0.1:5555/appointments/${appointmentToDelete.id}`, {
-          method: 'DELETE', // HTTP DELETE request
-        });
+        const response = await fetch(
+          `https://afya-mis-backend-6.onrender.com/appointments/${appointmentToDelete.id}`,
+          {
+            method: "DELETE", // HTTP DELETE request
+          }
+        );
 
         if (!response.ok) {
           throw new Error('Failed to cancel appointment');
@@ -114,16 +119,19 @@ function Appointments() {
 
     try {
       // Send a PATCH request to the server to update the appointment date and time
-      const response = await fetch(`http://127.0.0.1:5555/appointments/${updatedAppointment.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          appointment_date: appointmentDate,
-          appointment_time: convertTo24HourFormat(appointmentTime), // Ensure time is sent in 24-hour format
-        }),
-      });
+      const response = await fetch(
+        `https://afya-mis-backend-6.onrender.com/appointments/${updatedAppointment.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            appointment_date: appointmentDate,
+            appointment_time: convertTo24HourFormat(appointmentTime), // Ensure time is sent in 24-hour format
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to update appointment');

@@ -8,7 +8,9 @@ const DoctorList = () => {
   // Function to fetch doctors from the backend
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5555/doctors'); // Adjust the URL as necessary
+      const response = await axios.get(
+        "https://afya-mis-backend-6.onrender.com/doctors"
+      ); // Adjust the URL as necessary
       setDoctorList(response.data); // Set the state with the fetched data
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -20,17 +22,17 @@ const DoctorList = () => {
   }, []);
 
   // Remove doctor function
-  const removeDoctor = async (id) => {
-    try {
-      // Send DELETE request to the backend to remove the doctor
-      await axios.delete(`http://127.0.0.1:5555/doctors/${id}`);
+  // const removeDoctor = async (id) => {
+  //   try {
+  //     // Send DELETE request to the backend to remove the doctor
+  //     await axios.delete(`https://afya-mis-backend-6.onrender.com/doctors/${id}`);
 
-      // Update the state to remove the doctor locally
-      setDoctorList(doctorList.filter((doctor) => doctor.id !== id));
-    } catch (error) {
-      console.error("Error removing doctor:", error);
-    }
-  };
+  //     // Update the state to remove the doctor locally
+  //     setDoctorList(doctorList.filter((doctor) => doctor.id !== id));
+  //   } catch (error) {
+  //     console.error("Error removing doctor:", error);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">
