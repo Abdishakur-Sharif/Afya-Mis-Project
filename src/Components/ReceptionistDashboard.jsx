@@ -9,16 +9,25 @@ import Appointments from './Appointments';
 function ReceptionistDashboard() {
   const [selectedSection, setSelectedSection] = useState('register');
   const [patients, setPatients] = useState([]);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleRegisterPatient = (patient) => {
     setPatients([...patients, patient]);
   };
 
+  const handleLogout = () => {
+    // Clear authentication data (if any)
+    localStorage.removeItem('authToken'); // Example: removing a token
+    sessionStorage.clear(); // Clear any session storage, if used
+
+    // Redirect to the home page
+    navigate('/');
+  };
+
   return (
-    
     <div className="min-h-screen bg-gray-50 flex">
-      <NavigationBar onSelectSection={setSelectedSection} />
+      {/* Navigation bar with logout functionality */}
+      <NavigationBar onSelectSection={setSelectedSection} onLogout={handleLogout} />
 
       <div className="lg:flex-1 p-8 space-y-8 overflow-auto">
         {selectedSection === 'register' && <PatientRegistrationForm onSubmit={handleRegisterPatient} />}
