@@ -43,7 +43,7 @@ Copy code
 
 npm run dev
 
-The frontend will be available at http://localhost:5173.
+The frontend will be available at https://afya-mis-project.vercel.app/
 
 Backend Setup
 Clone the repository (if not already done):
@@ -87,7 +87,7 @@ Copy code
 
 flask run
 
-The backend API will be accessible at http://localhost:5555.
+The backend API will be accessible at https://afya-mis-backend-6.onrender.com/
 
 API Endpoints
 Lab Technician Management
