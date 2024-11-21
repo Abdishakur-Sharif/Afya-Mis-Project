@@ -21,6 +21,7 @@ function PatientRecords() {
         const patientsData = await patientsResponse.json();
         const paymentsData = await paymentsResponse.json();
 
+        // Update patients with the payment status
         const patientsWithPayments = patientsData.map((patient) => ({
           ...patient,
           hasPaid: paymentsData.some(
@@ -36,7 +37,6 @@ function PatientRecords() {
       console.error("Error fetching patients or payments:", error);
     }
   };
-
 
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
@@ -92,9 +92,9 @@ function PatientRecords() {
               <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">
                 Email
               </th>
-              <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">
+              {/* <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">
                 Address
-              </th>
+              </th> */}
               <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-gray-700">
                 Phone Number
               </th>
@@ -123,19 +123,25 @@ function PatientRecords() {
                 <td className="px-4 py-3 border-b border-gray-200 text-sm">
                   {patient.email}
                 </td>
-                <td className="px-4 py-3 border-b border-gray-200 text-sm">
+                {/* <td className="px-4 py-3 border-b border-gray-200 text-sm">
                   {patient.address}
-                </td>
+                </td> */}
                 <td className="px-4 py-3 border-b border-gray-200 text-sm">
                   {patient.phone_number || "No contact info"}
                 </td>
                 <td className="px-4 py-3 border-b border-gray-200 text-sm">
-                  <button
-                    onClick={() => handleAddPayment(patient.id)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
-                  >
-                    Add Payment
-                  </button>
+                  {patient.hasPaid ? (
+                    <button className="px-4 py-2 bg-green-500 text-white rounded-md cursor-not-allowed">
+                      Paid
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleAddPayment(patient.id)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+                    >
+                      Add Payment
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

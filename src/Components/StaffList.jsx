@@ -70,7 +70,7 @@ const StaffList = () => {
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Department</th>
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Contact</th>
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Email</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
+                {/* <th className="py-3 px-4 font-semibold">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -78,17 +78,17 @@ const StaffList = () => {
                 staffList.map((staff) => (
                   <tr key={staff.id} className="border-b last:border-none hover:bg-blue-100">
                     <td className="py-3 px-4 border-r border-gray-300 text-blue-700">{staff.name}</td>
-                    <td className=" py-3 px-4 border-r border-gray-300">{staff.department}</td>
-                    <td className="py-3 px-4 border-r border-gray-300">{staff.contact}</td>
+                    <td className=" py-3 px-4 border-r border-gray-300">{staff.role}</td>
+                    <td className="py-3 px-4 border-r border-gray-300">{staff.phone_number}</td>
                     <td className="py-3 px-4 border-r border-gray-300">{staff.email}</td>
-                    <td className="py-3 px-4">
+                    {/* <td className="py-3 px-4">
                       <button
                         onClick={() => removeStaff(staff.id)}
                         className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition-colors"
                       >
                         Remove
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (

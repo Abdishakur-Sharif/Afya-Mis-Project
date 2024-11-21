@@ -22,10 +22,13 @@ const DoctorList = () => {
   // Remove doctor function
   const removeDoctor = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:5555/doctors/${id}`); // Adjust the URL as necessary
-      setDoctorList(doctorList.filter((doctor) => doctor.id !== id)); // Update state to remove the doctor locally
+      // Send DELETE request to the backend to remove the doctor
+      await axios.delete(`http://127.0.0.1:5555/doctors/${id}`);
+
+      // Update the state to remove the doctor locally
+      setDoctorList(doctorList.filter((doctor) => doctor.id !== id));
     } catch (error) {
-      console.error('Error removing doctor:', error);
+      console.error("Error removing doctor:", error);
     }
   };
 
@@ -52,7 +55,7 @@ const DoctorList = () => {
               <th className="py-3 px-4 border-r border-gray-300 font-semibold">Specialization</th>
               <th className="py-3 px-4 border-r border-gray-300 font-semibold">Contact</th>
               <th className="py-3 px-4 border-r border-gray-300 font-semibold">Email</th>
-              <th className="py-3 px-4 font-semibold">Actions</th>
+              {/* <th className="py-3 px-4 font-semibold">Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -63,14 +66,14 @@ const DoctorList = () => {
                   <td className="py-3 px-4 border-r border-gray-300">{doctor.speciality}</td>
                   <td className="py-3 px-4 border-r border-gray-300">{doctor.phone_number}</td>
                   <td className="py-3 px-4 border-r border-gray-300">{doctor.email}</td>
-                  <td className="py-3 px-4">
+                  {/* <td className="py-3 px-4">
                     <button
                       onClick={() => removeDoctor(doctor.id)}
                       className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition-colors"
                     >
                       Remove
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))
             ) : (

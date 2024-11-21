@@ -110,14 +110,14 @@ function TestRequestsPage() {
               Lab Requests
             </a>
           </li>
-          <li>
+          {/* <li>
             <a
               href="/doctors"
               className="block py-2 px-4 rounded-md hover:bg-blue-700 transition"
             >
               Doctors
             </a>
-          </li>
+          </li> */}
           <li>
             <a
               href="/labreportform"

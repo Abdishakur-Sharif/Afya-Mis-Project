@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { IconHospitalCircle } from "@tabler/icons-react";
 
+
 const Notification = ({ message, type }) => {
   if (!message) return null;
 
@@ -53,7 +54,7 @@ const LabReportForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate that findings are correctly filled
+    // Validate findings
     for (const finding of findings) {
       if (!finding.parameter || !finding.result) {
         setNotification({
@@ -66,46 +67,41 @@ const LabReportForm = () => {
       }
     }
 
-    // Now construct the reportData with findings correctly
     const reportData = {
-      patient_name: patientName, // Send patient name directly
-      doctor_name: doctorName, // Send doctor name directly
-      test_type: testType, // Send test type directly
-      findings: findings, // Send findings (parameter and result)
-      remark: remarks, // Optional remarks
+      patient_name: patientName,
+      doctor_name: doctorName,
+      test_type: testType,
+      findings: findings,
+      remark: remarks,
+      labTech, // Include lab tech details
     };
 
-    console.log("Submitting form with data:", reportData);
-
     try {
-      // Make POST request to submit the lab report
       const response = await fetch("http://127.0.0.1:5555/test_reports", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(reportData), // Send the data without the test_id
+        body: JSON.stringify(reportData),
       });
 
       const result = await response.json();
 
       if (result.error) {
-        console.error("Server Error:", result.error);
         setNotification({
           visible: true,
           type: "error",
           message: `Error: ${result.error}`,
         });
       } else {
-        console.log("Test report created successfully:", result);
         setNotification({
           visible: true,
           type: "success",
-          message: `The lab result for ${patientName} is ready! You can now check the result.`,
+          message: `The lab result for ${patientName} is ready!`,
         });
+
       }
     } catch (error) {
-      console.error("Request failed:", error);
       setNotification({
         visible: true,
         type: "error",
@@ -222,6 +218,9 @@ const LabReportForm = () => {
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
+          </div>
+
+          <div>
           </div>
 
           <div className="text-right">

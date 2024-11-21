@@ -51,7 +51,7 @@ function Sidebar() {
             Doctors
           </a>
         </li> */}
-        <li>
+        {/* <li>
           <a
             href="/report"
             className="flex items-center p-2 text-gray-700 hover:bg-blue-500 hover:text-white transition-colors rounded-md"
@@ -59,7 +59,7 @@ function Sidebar() {
             <IconFileText size={20} className="mr-3" />
             Medical Reports
           </a>
-        </li>
+        </li> */}
         <li>
           <a
             href="/addtestrequest"

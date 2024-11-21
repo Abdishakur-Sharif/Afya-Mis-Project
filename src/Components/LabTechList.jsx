@@ -68,7 +68,7 @@ const LabTechList = () => {
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Name</th>
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Contact</th>
                 <th className="py-3 px-4 border-r border-gray-300 font-semibold">Email</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
+                {/* <th className="py-3 px-4 font-semibold">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -76,16 +76,16 @@ const LabTechList = () => {
                 labtechList.map((labtech) => (
                   <tr key={labtech.id} className="border-b last:border-none hover:bg-blue-100">
                     <td className="py-3 px-4 border-r border-gray-300 text-blue-700">{labtech.name}</td>
-                    <td className="py-3 px-4 border-r border-gray-300">{labtech.contact}</td>
+                    <td className="py-3 px-4 border-r border-gray-300">{labtech.phone_number}</td>
                     <td className="py-3 px-4 border-r border-gray-300">{labtech.email}</td>
-                    <td className="py-3 px-4">
+                    {/* <td className="py-3 px-4">
                       <button
                         onClick={() => removeLabtech(labtech.id)}
                         className="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600 transition-colors"
                       >
                         Remove
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
