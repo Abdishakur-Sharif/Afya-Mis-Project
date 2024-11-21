@@ -1,34 +1,26 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+  Container, Typography, Paper, TextField, Button,
+  Card, CardContent, Grid, Snackbar, Alert, MenuItem
+} from '@mui/material';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const BASE_URL = "http://127.0.0.1:5555";
 
 const DiagnosisPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams(); // Patient ID
   const [state, setState] = useState({
     patient: null,
+    doctors: [],
     loading: true,
     labData: null,
+    consultationId: null, // Store consultation ID here
     diagnosis: {
-      date: "",
       notes: [],
-      currentNote: "",
-      description: "",
+      currentNote: '',
+      description: '',
+      doctorId: '' // Selected doctor ID
     },
     feedback: {
       success: "",
@@ -41,29 +33,22 @@ const DiagnosisPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientResponse, labResponse] = await Promise.all([
+        const [patientResponse, labResponse, doctorsResponse] = await Promise.all([
           axios.get(`${BASE_URL}/patients/${id}`),
-          axios.get(`${BASE_URL}/test_reports?test_id=${id}`),
+          axios.get(`${BASE_URL}/test_reports/${id}`),
+          axios.get(`${BASE_URL}/doctors`) // Fetch the list of doctors
         ]);
 
-        // Log patient data to verify appointment_id is included
-        console.log("Patient Data:", patientResponse.data);
-
-        setState((prev) => ({
+        setState(prev => ({
           ...prev,
           patient: patientResponse.data,
           labData: labResponse.data,
+          doctors: doctorsResponse.data, // Set doctors data
           loading: false,
-          diagnosis: {
-            ...prev.diagnosis,
-            // Auto-fill fields based on patient data
-            patient_id: patientResponse.data.id,
-            doctor_id: patientResponse.data.doctor_id,
-            appointment_id: patientResponse.data.appointment_id,
-          },
+          consultationId: patientResponse.data.consultation_id
         }));
       } catch (error) {
-        setState((prev) => ({
+        setState(prev => ({
           ...prev,
           loading: false,
           feedback: { error: "Data fetch failed" },
@@ -99,54 +84,28 @@ const DiagnosisPage = () => {
   // Handle form submission for diagnosis
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { patient, diagnosis } = state;
+    const { patient, consultationId, diagnosis } = state;
 
     if (state.isSubmitting) return;
 
     setState({ ...state, isSubmitting: true });
 
-    // Detailed validation
-    if (!patient?.id) {
+    // Validation
+    if (!diagnosis.doctorId) {
       setState({
         ...state,
-        feedback: { error: "Patient ID is missing" },
-        isSubmitting: false,
-      });
-      return;
-    }
-
-    if (!diagnosis.date) {
-      setState({
-        ...state,
-        feedback: { error: "Diagnosis date is required" },
-        isSubmitting: false,
-      });
-      return;
-    }
-
-    if (diagnosis.notes.length === 0) {
-      setState({
-        ...state,
-        feedback: { error: "At least one diagnosis note is required" },
-        isSubmitting: false,
-      });
-      return;
-    }
-
-    if (!diagnosis.description) {
-      setState({
-        ...state,
-        feedback: { error: "Description is required" },
-        isSubmitting: false,
+        feedback: { error: 'Please select a doctor' },
+        isSubmitting: false
       });
       return;
     }
 
     const diagnosisPayload = {
+      notes: diagnosis.notes,
       patient_id: patient.id,
-      doctor_id: patient.doctor_id || null,
-      appointment_id: patient.appointment_id || null, // Add appointment_id if available
+      consultation_id: consultationId,
       description: diagnosis.description,
+      doctor_id: diagnosis.doctorId, // Include the selected doctor's ID
       created_at: new Date().toISOString(),
     };
 
@@ -155,19 +114,16 @@ const DiagnosisPage = () => {
 
       setState({
         ...state,
-        feedback: { success: "Diagnosis created successfully!" },
-        isSubmitting: false,
+        feedback: { success: 'Diagnosis created successfully!' },
+        isSubmitting: false
       });
     } catch (error) {
       setState({
         ...state,
         feedback: {
-          error:
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            "An unexpected error occurred",
+          error: error.response?.data?.message || 'An unexpected error occurred'
         },
-        isSubmitting: false,
+        isSubmitting: false
       });
     }
   };
@@ -188,13 +144,7 @@ const DiagnosisPage = () => {
       {state.labData && (
         <Paper sx={{ p: 2, mb: 3 }}>
           <Typography variant="h6">Lab Results:</Typography>
-          <Box>
-            {state.labData.result ? (
-              <Typography>{state.labData.result}</Typography>
-            ) : (
-              <Typography>No results available</Typography>
-            )}
-          </Box>
+          <Typography>{state.labData.result || 'No results'}</Typography>
         </Paper>
       )}
 
@@ -202,40 +152,35 @@ const DiagnosisPage = () => {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField
-              label="Diagnosis Date"
-              type="date"
+              label="Description"
               fullWidth
-              value={state.diagnosis.date}
-              onChange={(e) =>
-                setState({
-                  ...state,
-                  diagnosis: {
-                    ...state.diagnosis,
-                    date: e.target.value,
-                  },
-                })
-              }
-              InputLabelProps={{ shrink: true }}
+              value={state.diagnosis.description}
+              onChange={(e) => setState({
+                ...state,
+                diagnosis: { ...state.diagnosis, description: e.target.value }
+              })}
+              multiline
+              rows={4}
             />
           </Grid>
 
           <Grid item xs={12}>
             <TextField
-              label="Description"
+              select
+              label="Select Doctor"
               fullWidth
-              value={state.diagnosis.description}
-              onChange={(e) =>
-                setState({
-                  ...state,
-                  diagnosis: {
-                    ...state.diagnosis,
-                    description: e.target.value,
-                  },
-                })
-              }
-              multiline
-              rows={4}
-            />
+              value={state.diagnosis.doctorId}
+              onChange={(e) => setState({
+                ...state,
+                diagnosis: { ...state.diagnosis, doctorId: e.target.value }
+              })}
+            >
+              {state.doctors.map((doctor) => (
+                <MenuItem key={doctor.id} value={doctor.id}>
+                  {doctor.name}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} container spacing={2}>
@@ -244,19 +189,18 @@ const DiagnosisPage = () => {
                 label="Diagnosis Note"
                 fullWidth
                 value={state.diagnosis.currentNote}
-                onChange={(e) =>
-                  setState({
-                    ...state,
-                    diagnosis: {
-                      ...state.diagnosis,
-                      currentNote: e.target.value,
-                    },
-                  })
-                }
+                onChange={(e) => setState({
+                  ...state,
+                  diagnosis: { ...state.diagnosis, currentNote: e.target.value }
+                })}
               />
             </Grid>
             <Grid item xs={3}>
-              <Button variant="contained" fullWidth onClick={addNote}>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={addNote}
+              >
                 Add Note
               </Button>
             </Grid>
@@ -297,10 +241,8 @@ const DiagnosisPage = () => {
         }
       >
         <Alert
-          severity={state.feedback.success ? "success" : "error"}
-          onClose={() =>
-            setState({ ...state, feedback: { success: "", error: "" } })
-          }
+          severity={state.feedback.success ? 'success' : 'error'}
+          onClose={() => setState({ ...state, feedback: { success: '', error: '' } })}
         >
           {state.feedback.success || state.feedback.error}
         </Alert>
